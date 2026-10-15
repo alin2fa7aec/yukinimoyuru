@@ -1,0 +1,178 @@
+""" vimrc
+
+""" Settle the encoding before any other setting
+set encoding=utf-8
+scriptencoding utf-8
+
+""""""""""""""""""""""""
+""" Files / undo / swap
+
+set modeline
+set nobackup
+
+""" Collect undo / swap files in one place instead of scattering them next to edited files
+for s:dir in ['~/.vim/undo', '~/.vim/swap']
+    if !isdirectory(expand(s:dir))
+        call mkdir(expand(s:dir), 'p', 0700)
+    endif
+endfor
+unlet! s:dir
+set undofile
+set undodir=~/.vim/undo
+set directory=~/.vim/swap//
+
+set hidden
+set autoread
+set history=1000
+
+""""""""""""""""""""""""
+""" Editing
+
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+
+set backspace=indent,eol,start
+set whichwrap=b,s,h,l,<,>,[,],~
+set virtualedit=block
+set nrformats-=octal
+set ttimeoutlen=10
+
+""" On macOS this is the system clipboard; on Linux (X11) unnamed maps to PRIMARY and unnamedplus to CLIPBOARD.
+""" With both, yanks go to both and puts come from +. Requires a +clipboard build.
+set clipboard=unnamed,unnamedplus,autoselect
+
+""""""""""""""""""""""""
+""" Search
+
+set hlsearch
+set incsearch
+
+""""""""""""""""""""""""
+""" Display
+
+set number
+set ruler
+set cursorline
+set colorcolumn=100
+set scrolloff=5
+set list
+set listchars=tab:>-,trail:_,extends:>,precedes:<,nbsp:%
+set showcmd
+set wildmenu
+set wildmode=longest:full,full
+set splitbelow
+set splitright
+""" Keep this consistent with the terminal's ambiguous-width setting
+set ambiwidth=double
+set belloff=all
+" set mouse=a
+
+set statusline=%<%f\ %m%r%w%h(%l/%L)%=%y%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}
+set laststatus=2
+
+set tags+=tags;
+
+""" syntax on / changing background resets highlights to defaults, so place them before custom highlights
+set background=light
+syntax on
+filetype plugin indent on
+
+""" The ColorScheme event fires only when :colorscheme runs, so also apply directly at startup
+function! s:apply_highlight() abort
+    highlight ColorColumn ctermbg=254
+    highlight StatusLine cterm=bold ctermfg=white ctermbg=blue
+endfunction
+
+augroup vimrc_highlight
+    autocmd!
+    autocmd ColorScheme * call s:apply_highlight()
+augroup END
+call s:apply_highlight()
+
+""""""""""""""""""""""""
+""" Automatic character encoding detection
+""" iso-2022-jp fails to convert anything containing 8-bit bytes, so putting it first does not steal UTF-8 files.
+""" euc-jp / cp932 can wrongly accept UTF-8, so put them after utf-8.
+if has('iconv')
+    let s:enc_euc = 'euc-jp'
+    let s:enc_jis = 'iso-2022-jp'
+
+    if iconv("\x87\x64\x87\x6a", 'cp932', 'eucjp-ms') ==# "\xad\xc5\xad\xcb"
+        let s:enc_euc = 'eucjp-ms'
+        let s:enc_jis = 'iso-2022-jp-3'
+    elseif iconv("\x87\x64\x87\x6a", 'cp932', 'euc-jisx0213') ==# "\xad\xc5\xad\xcb"
+        let s:enc_euc = 'euc-jisx0213'
+        let s:enc_jis = 'iso-2022-jp-3'
+    endif
+
+    let &fileencodings = join(['ucs-bom', s:enc_jis, 'utf-8', s:enc_euc, 'cp932', 'latin1'], ',')
+
+    unlet s:enc_euc
+    unlet s:enc_jis
+endif
+
+""" If an ASCII-only file is detected as iso-2022-jp, fall back to encoding
+function! s:recheck_fenc() abort
+    if &fileencoding =~# 'iso-2022-jp' && search("[^\x01-\x7e]", 'n') == 0
+        let &fileencoding = &encoding
+    endif
+endfunction
+
+augroup vimrc_recheck_fenc
+    autocmd!
+    autocmd BufReadPost * call s:recheck_fenc()
+augroup END
+
+set fileformats=unix,dos,mac
+
+""""""""""""""""""""""""
+""" Key mappings
+
+""" Clear the hlsearch highlight
+nnoremap <silent> <Esc><Esc> :nohlsearch<CR>
+
+""" Move through wrapped lines by display line (with a count like 3j, still by logical line)
+nnoremap <expr> j v:count ? 'j' : 'gj'
+nnoremap <expr> k v:count ? 'k' : 'gk'
+xnoremap <expr> j v:count ? 'j' : 'gj'
+xnoremap <expr> k v:count ? 'k' : 'gk'
+
+""" Make the same keys work as macOS native Ctrl+A/E for line start/end and Option+arrow for word movement.
+""" The following standard vim features are overridden:
+"""   Normal: Ctrl+A (increment number) / Ctrl+E (scroll screen)
+"""   Visual: Ctrl+A (increment numbers in the selection)
+"""   Insert: Ctrl+A (reinsert the last inserted text) / Ctrl+E (copy the character from the line below)
+nnoremap <C-A> <Home>
+nnoremap <C-E> <End>
+vnoremap <C-A> <Home>
+vnoremap <C-E> <End>
+inoremap <C-A> <Home>
+inoremap <C-E> <End>
+
+""" Whether Option+arrow arrives from the terminal as <M-Left>/<M-Right> depends on terminal settings
+""" (press Ctrl-V followed by the key in insert mode to see the actual sequence)
+nnoremap <M-Left> b
+nnoremap <M-Right> w
+vnoremap <M-Left> b
+vnoremap <M-Right> w
+inoremap <M-Left> <C-Left>
+inoremap <M-Right> <C-Right>
+
+""" Start/extend the selection with Shift+arrow/Home/End (the same model as Cocoa's Shift selection)
+set keymodel=startsel,stopsel
+set selectmode=key
+
+""" Option+Shift+Right (word selection) is not in the keymodel key list above, so map it separately.
+""" iw selects the whole word under the cursor (unlike Cocoa's "from the cursor to the end of the word").
+""" Switch with <C-g> so it ends in Select mode like Shift+arrow (typing replaces the selection).
+""" <C-o> enters the selection without shifting the insert-mode cursor position.
+nnoremap <M-S-Right> viw<C-g>
+vnoremap <M-S-Right> iw
+inoremap <M-S-Right> <C-o>viw<C-g>
+
+""""""""""""""""""""""""
+
+
+""" end

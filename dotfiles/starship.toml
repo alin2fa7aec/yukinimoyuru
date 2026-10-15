@@ -1,0 +1,61 @@
+format = """
+$directory\
+[▓▒](fg:#769ff0 bg:#394260)\
+${custom.jj}\
+[▓▒](fg:#394260 bg:#212736)\
+$nodejs\
+$rust\
+$golang\
+$php\
+[▓▒](fg:#212736 bg:#1d2230)\
+$time\
+\n$character"""
+
+add_newline = false
+
+[directory]
+style = "fg:#e3e5e5 bg:#769ff0"
+truncation_length = -1
+truncate_to_repo = false
+fish_style_pwd_dir_length = 0
+use_logical_path = true
+format = "[ $path ]($style)[$read_only]($read_only_style)"
+repo_root_format = "[ $before_root_path ]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style)"
+disabled = false
+read_only = "🔒"
+read_only_style = "red"
+truncation_symbol = "…/"
+home_symbol = "~"
+
+[git_branch]
+disabled = true   # replaced by custom.jj
+
+[git_status]
+disabled = true   # replaced by custom.jj
+
+[custom.jj]
+symbol = "\uF418"   # nf-oct-git_branch
+style = "bg:#394260"
+format = '[[ $symbol $output ](fg:#769ff0 bg:#394260)]($style)'
+when = "jj-starship detect"
+shell = ["jj-starship", "--no-color", "--no-symbol", "--no-jj-prefix", "--no-git-prefix"]
+
+[nodejs]
+symbol = "\uE718"   # nf-dev-nodejs_small
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[rust]
+symbol = "🦀"
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[time]
+disabled = false
+time_format = "%R" # Hour:Minute Format
+style = "bg:#1d2230"
+format = "[[ \uF43A $time ](fg:#a0a9cb bg:#1d2230)]($style)"   # nf-oct-clock
+
+[character]
+success_symbol = "[ ❯](bold #769ff0)"   # nf-linux-nixos
+error_symbol = "[ ❯](bold #e06c75)"     # nf-linux-nixos

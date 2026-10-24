@@ -20,6 +20,11 @@ config.default_prog = { "nu" }
 -- Add a title bar so the window can be moved and resized.
 config.window_decorations = "TITLE | RESIZE"
 
+-- Make the background translucent. niri blurs it with a window rule (dotfiles/niri/config.kdl).
+-- On Plasma (KWin) and others, wezterm requests the blur
+config.window_background_opacity = 0.92
+config.wayland_window_background_blur = true
+
 -- tmux-style leader: Ctrl+q
 config.leader = { key = "q", mods = "CTRL", timeout_milliseconds = 2000 }
 

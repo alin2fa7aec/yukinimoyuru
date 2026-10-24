@@ -1,0 +1,48 @@
+// One vertical bar per monitor, each on the side where the monitors meet.
+// Output names and left/right placement match the outputs in dotfiles/niri/config.kdl.
+// niri's Mod+S sends SIGUSR1 to waybar. Bars other than the 4K one set on-sigusr1 to noop, so only the 4K bar is shown or hidden.
+// 縦のバーはモジュールをすべて modules-left に入れて上端から詰め、style.css で箱を左右に散らして折れ線でつなぐ。
+// Box positions and lines assume this order, so update style.css when changing it.
+[
+  {
+    // Left QHD monitor: right edge. The tray can only appear on one bar, so put it on this one, which is never hidden
+    "output": "DP-3",
+    "position": "right",
+    "width": 88,
+    "on-sigusr1": "noop",
+    "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock", "tray"],
+    "include": ["~/.config/waybar/modules.jsonc"]
+  },
+  {
+    // Right 4K monitor: left edge
+    // ふだんは隠しておき、Mod+S で出す。出している間はウィンドウの上に重ね、配置は動かさない
+    "output": "HDMI-A-1",
+    "position": "left",
+    "width": 88,
+    "start_hidden": true,
+    "layer": "top",
+    "exclusive": false,
+    "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock"],
+    "include": ["~/.config/waybar/modules.jsonc"]
+  },
+  {
+    // QHD モニタ右上の壁時計。
+    // waybar は幅を指定すると中央に寄せてしまうので、画面幅いっぱいの透明なバーの右端に置く。
+    // overlay なので常に最前面に出るが、passthrough でクリックは下のウィンドウに通す
+    "name": "wallclock",
+    "output": "DP-3",
+    "position": "top",
+    "layer": "overlay",
+    "exclusive": false,
+    "passthrough": true,
+    // 余白は取らない。箱から上の線を画面の上端に、右の線を縦のバーの左端につなげるため。
+    // このバーは場所を確保しないが、縦のバーが確保した場所は避けて置かれるので、右端は縦のバーの左端に接する
+    "on-sigusr1": "noop",
+    "modules-right": ["clock#wall"],
+    "clock#wall": {
+      // コロンだけ nordfox の cyan にして、アクセントにする
+      "format": "{:%H<span color='#88c0d0'>:</span>%M}",
+      "tooltip": false
+    }
+  }
+]

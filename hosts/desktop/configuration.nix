@@ -49,6 +49,8 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-cjk-serif
+    # For waybar icons (a Nerd Font containing only icons)
+    nerd-fonts.symbols-only
   ];
   fonts.fontconfig.defaultFonts.monospace = [ "Moralerspace Argon HW" "Noto Sans Mono CJK JP" ];
 

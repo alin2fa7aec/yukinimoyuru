@@ -278,8 +278,7 @@ layout {
 // which may be more convenient to use.
 // See the binds section below for more spawn examples.
 
-// This line starts waybar, a commonly used bar for Wayland compositors.
-spawn-at-startup "waybar"
+// waybar は home/alin.nix の systemd ユーザーサービスで、niri.service に合わせて起動する
 spawn-at-startup "mako"
 spawn-at-startup "fcitx5" "-d"
 
@@ -598,6 +597,10 @@ binds {
     // since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
     // Mod+Space       { switch-layout "next"; }
     // Mod+Shift+Space { switch-layout "prev"; }
+
+    // Show or hide the waybar on the 4K monitor. The other bar ignores SIGUSR1 (dotfiles/waybar/config.jsonc)
+    // On NixOS, waybar runs as .waybar-wrapped from a wrapper, so do not match exactly with -x
+    Mod+S hotkey-overlay-title="Toggle the 4K Bar" { spawn "pkill" "-USR1" "waybar"; }
 
     // Select a region and capture it (same as Win+Shift+S on Windows)
     Mod+Shift+S { screenshot; }

@@ -1,0 +1,436 @@
+/* nordfox (nightfox.nvim) の配色。wezterm のテーマと合わせる */
+@define-color bg0 #232831;
+@define-color bg1 #2e3440;
+@define-color bg3 #444c5e;
+@define-color fg1 #cdcecf;
+@define-color fg3 #7e8188;
+@define-color blue #81a1c1;
+@define-color cyan #88c0d0;
+@define-color red #bf616a;
+
+/* Following Rainmeter's Cubes 2, modules are translucent square boxes of different sizes that look connected by thin lines.
+   glass is the inside of a box, edge its border, edge-hi the border of the visible workspace, and wire the color of the lines between boxes.
+   wire-end is the color at the tip of a fading line */
+@define-color glass alpha(@bg1, 0.6);
+@define-color edge alpha(@fg1, 0.4);
+@define-color edge-hi alpha(@fg1, 0.8);
+@define-color wire alpha(@fg1, 0.3);
+@define-color wire-end alpha(@fg1, 0);
+
+* {
+  /* Moralerspace lacks the icons, so fall back to Symbols Nerd Font */
+  font-family: "Moralerspace Argon HW", "Symbols Nerd Font", monospace;
+  font-size: 15px;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+/* バー自体は透明にして、箱と線だけを壁紙の上に浮かせる。
+   バーの上端から長い縦線を 2 本引き、箱の後ろを通して、下へ伸びながら消えていくようにする */
+window#waybar {
+  background-color: transparent;
+  background-image:
+    linear-gradient(@wire, @wire-end),
+    linear-gradient(@wire, @wire-end);
+  background-repeat: no-repeat;
+  background-size:
+    1px 1000px,
+    1px 700px;
+  background-position:
+    26px 0,
+    72px 0;
+  color: @fg1;
+}
+
+tooltip {
+  background-color: @bg1;
+  border: 1px solid @bg3;
+}
+
+tooltip label {
+  color: @fg1;
+}
+
+/* モジュールは上から順に積み、どれもバーの幅 (88px) いっぱいの領域を持つ。
+   その中の好きな位置に箱を描き、箱をつなぐ折れ線や飾りの短い線も、自分の領域を通る部分を自分で描く。
+   Boxes are drawn with background-image instead of border so lines can extend outside the box.
+   箱の左端を L、幅を S、上の余白を T、下の余白を B とすると、padding を T, 88 - L - S, B, L、min-height を S にして、文字を箱の中央に置く。
+   background-image の層は、箱の上下左右の辺 4 枚、線の数だけの枚数、箱の中 1 枚の順に重ねる。
+   線は 1 本の折れ線を縦と横の 1px の矩形に分けて描くので、モジュールごとの座標は手で書かず、
+   折れ線の点列から計算して書き出している。線の形を変えるときは、座標をまとめて計算し直す */
+#custom-overview,
+#cpu,
+#memory,
+#idle_inhibitor,
+#pulseaudio,
+#clock {
+  margin: 0;
+  background-repeat: no-repeat;
+}
+
+/* Modules that stack an icon and a number on two lines use smaller text to fit the box */
+#cpu,
+#memory,
+#pulseaudio,
+#clock {
+  font-size: 12px;
+}
+
+#custom-overview {
+  font-size: 18px;
+}
+
+#custom-overview:hover {
+  color: @cyan;
+}
+
+/* QHD のバーでは、時計の下に tray が続く。
+   The tray's height changes with the number of icons, so its box cannot be drawn with background-image and uses border instead.
+   その代わり tray の上には余白を取らず、時計からの線を時計の領域の下端まで下ろして、tray の上辺につなぐ */
+#tray {
+  margin: 0 10px 8px 40px;
+  padding: 6px 0;
+  background-color: @glass;
+  border: 1px solid @edge;
+}
+
+/* ワークスペースは一回り小さい 26px 四方の箱にする。
+   3 つ周期で左、右、中に置き、最後のワークスペースからは次のワークスペースではなく cpu へ線を引く。
+   状態ごとに色を変えられるよう、どの位置でも線を 5 本にそろえ、層の数を同じにしている。
+   Remove the shadows and gradients GTK buttons have */
+#workspaces button {
+  margin: 0;
+  min-height: 26px;
+  color: @fg3;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+#custom-overview {
+  padding: 22px 8px 8px 46px;
+  min-height: 34px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 34px 1px, 34px 1px, 1px 34px, 1px 34px, 46px 1px, 11px 1px, 1px 5px, 36px 1px, 1px 22px, 1px 22px, 1px 5px, 55px 1px, 1px 4px, 34px 34px;
+  background-position: 46px 22px, 46px 55px, 46px 22px, 79px 22px, 0px 40px, 0px 48px, 10px 48px, 10px 52px, 58px 0px, 62px 0px, 70px 56px, 16px 60px, 16px 60px, 46px 22px;
+}
+
+#cpu {
+  padding: 10px 42px 8px 8px;
+  min-height: 38px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 10px, 39px 1px, 1px 38px, 5px 1px, 1px 26px, 38px 38px;
+  background-position: 8px 10px, 8px 47px, 8px 10px, 45px 10px, 30px 0px, 46px 18px, 84px 18px, 3px 30px, 3px 30px, 8px 10px;
+}
+
+#memory {
+  padding: 0px 20px 14px 30px;
+  min-height: 38px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 23px, 17px 1px, 1px 45px, 34px 1px, 1px 7px, 1px 14px, 7px 1px, 1px 22px, 38px 38px;
+  background-position: 30px 0px, 30px 37px, 30px 0px, 67px 0px, 84px 0px, 68px 22px, 3px 0px, 3px 44px, 36px 38px, 44px 38px, 68px 30px, 74px 30px, 30px 0px;
+}
+
+#idle_inhibitor {
+  padding: 12px 8px 10px 50px;
+  min-height: 30px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 21px, 6px 1px, 1px 12px, 1px 7px, 35px 1px, 1px 4px, 7px 1px, 1px 24px, 30px 30px;
+  background-position: 50px 12px, 50px 41px, 50px 12px, 79px 12px, 44px 0px, 44px 20px, 74px 0px, 64px 42px, 30px 48px, 30px 48px, 80px 28px, 86px 28px, 50px 12px;
+}
+
+#pulseaudio {
+  padding: 14px 38px 8px 12px;
+  min-height: 38px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 14px, 1px 34px, 37px 1px, 1px 8px, 11px 1px, 1px 22px, 38px 38px;
+  background-position: 12px 14px, 12px 51px, 12px 14px, 49px 14px, 30px 0px, 86px 0px, 50px 33px, 20px 52px, 50px 38px, 60px 38px, 12px 14px;
+}
+
+#clock {
+  padding: 12px 8px 14px 34px;
+  min-height: 46px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire-end),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire-end),
+    linear-gradient(@glass, @glass);
+  background-size: 46px 1px, 46px 1px, 1px 46px, 1px 46px, 1px 39px, 14px 1px, 1px 12px, 1px 14px, 5px 1px, 1px 34px, 46px 46px;
+  background-position: 34px 12px, 34px 57px, 34px 12px, 79px 12px, 20px 0px, 20px 38px, 60px 0px, 56px 58px, 80px 38px, 84px 38px, 34px 12px;
+}
+
+window#waybar.right #clock {
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 46px 1px, 46px 1px, 1px 46px, 1px 46px, 1px 39px, 14px 1px, 1px 12px, 1px 14px, 5px 1px, 1px 29px, 13px 1px, 1px 6px, 46px 46px;
+  background-position: 34px 12px, 34px 57px, 34px 12px, 79px 12px, 20px 0px, 20px 38px, 60px 0px, 56px 58px, 80px 38px, 84px 38px, 72px 66px, 72px 66px, 34px 12px;
+}
+
+#workspaces button:nth-child(3n+1) {
+  padding: 7px 54px 5px 8px;
+  min-height: 26px;
+  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 7px, 1px 3px, 45px 1px, 1px 3px, 8px 1px, 26px 26px;
+  background-position: 8px 7px, 8px 32px, 8px 7px, 33px 7px, 16px 0px, 28px 33px, 28px 35px, 72px 35px, 0px 20px, 8px 7px;
+}
+
+#workspaces button:nth-child(3n+1):last-child {
+  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 7px, 1px 3px, 3px 1px, 1px 3px, 8px 1px, 26px 26px;
+  background-position: 8px 7px, 8px 32px, 8px 7px, 33px 7px, 16px 0px, 28px 33px, 28px 35px, 30px 35px, 0px 20px, 8px 7px;
+}
+
+#workspaces button:nth-child(3n+2) {
+  padding: 4px 8px 8px 54px;
+  min-height: 26px;
+  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 4px, 1px 5px, 15px 1px, 1px 4px, 8px 1px, 26px 26px;
+  background-position: 54px 4px, 54px 29px, 54px 4px, 79px 4px, 72px 0px, 60px 30px, 46px 34px, 46px 34px, 80px 12px, 54px 4px;
+}
+
+#workspaces button:nth-child(3n+2):last-child {
+  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 4px, 1px 5px, 31px 1px, 1px 4px, 8px 1px, 26px 26px;
+  background-position: 54px 4px, 54px 29px, 54px 4px, 79px 4px, 72px 0px, 60px 30px, 30px 34px, 30px 34px, 80px 12px, 54px 4px;
+}
+
+#workspaces button:nth-child(3n) {
+  padding: 6px 34px 6px 28px;
+  min-height: 26px;
+  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 6px, 1px 4px, 19px 1px, 1px 3px, 1px 3px, 26px 26px;
+  background-position: 28px 6px, 28px 31px, 28px 6px, 53px 6px, 46px 0px, 34px 32px, 16px 35px, 16px 35px, 16px 35px, 28px 6px;
+}
+
+#workspaces button:nth-child(3n):last-child {
+  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 6px, 1px 4px, 5px 1px, 1px 3px, 1px 3px, 26px 26px;
+  background-position: 28px 6px, 28px 31px, 28px 6px, 53px 6px, 46px 0px, 34px 32px, 30px 35px, 30px 35px, 30px 35px, 28px 6px;
+}
+
+/* ワークスペースの状態ごとに、箱の縁と中の色を変える。線の色は変えない */
+#workspaces button {
+  color: @fg3;
+  background-image:
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(alpha(@bg1, 0.45), alpha(@bg1, 0.45));
+}
+
+#workspaces button:hover {
+  color: @fg1;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(alpha(@bg1, 0.45), alpha(@bg1, 0.45));
+}
+
+/* そのモニタで表示中のワークスペース */
+#workspaces button.active {
+  color: @fg1;
+  background-image:
+    linear-gradient(@edge-hi, @edge-hi),
+    linear-gradient(@edge-hi, @edge-hi),
+    linear-gradient(@edge-hi, @edge-hi),
+    linear-gradient(@edge-hi, @edge-hi),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+}
+
+/* フォーカスのあるモニタで表示中のワークスペース */
+#workspaces button.focused {
+  color: @fg1;
+  background-image:
+    linear-gradient(@blue, @blue),
+    linear-gradient(@blue, @blue),
+    linear-gradient(@blue, @blue),
+    linear-gradient(@blue, @blue),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(alpha(@blue, 0.3), alpha(@blue, 0.3));
+}
+
+#workspaces button.urgent {
+  color: @red;
+  background-image:
+    linear-gradient(@red, @red),
+    linear-gradient(@red, @red),
+    linear-gradient(@red, @red),
+    linear-gradient(@red, @red),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+}
+
+/* 壁時計 (config.jsonc の wallclock)。縦のバーの線は引かず、時計の箱と線だけを見せる */
+window#waybar.wallclock {
+  background-image: none;
+}
+
+/* clock#wall は上の #clock にも当たるので、箱の設定を上書きする。
+   左から 30px、上から 36px の位置に 100px 四方の箱を描き、その後ろの右上と左下に、小さい四角形を 1 つずつ重ねる。
+   後ろの四角形は、時計の箱に隠れる部分の縁を描かない。中は重なった部分だけ濃くなる。
+   そのまわりの余白に、箱から伸びる線を描く。右の余白はバーの左端まで続くので、そこへ線を 2 本引き、バーの overview の左辺へつなぐ。
+   上の線は画面の上端まで、下の線は長く伸ばして消えていくようにする */
+#clock.wall {
+  margin: 0;
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  font-size: 28px;
+  letter-spacing: 2px;
+  color: @fg1;
+  text-shadow: 0 1px 3px alpha(#000000, 0.6);
+  padding: 36px 60px 100px 30px;
+  min-height: 100px;
+  min-width: 100px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire-end),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire-end),
+    linear-gradient(@wire, @wire-end),
+    linear-gradient(@glass, @glass),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@glass, @glass),
+    linear-gradient(@glass, @glass);
+  background-size: 100px 1px, 100px 1px, 1px 100px, 1px 100px, 1px 36px, 1px 14px, 13px 1px, 1px 23px, 1px 14px, 22px 1px, 49px 1px, 1px 53px, 12px 1px, 30px 1px, 1px 80px, 1px 25px, 15px 1px, 1px 66px, 1px 55px, 100px 100px, 56px 1px, 38px 1px, 1px 22px, 1px 56px, 18px 1px, 40px 1px, 1px 40px, 1px 20px, 56px 56px, 40px 40px;
+  background-position: 30px 36px, 30px 135px, 30px 36px, 129px 36px, 48px 0px, 64px 22px, 64px 22px, 76px 0px, 150px 0px, 168px 40px, 130px 100px, 178px 48px, 178px 48px, 0px 90px, 24px 156px, 70px 136px, 70px 160px, 84px 160px, 110px 136px, 30px 36px, 112px 14px, 130px 69px, 112px 14px, 167px 14px, 12px 116px, 12px 155px, 12px 116px, 51px 136px, 112px 14px, 12px 116px;
+}
+
+#idle_inhibitor.deactivated {
+  color: @fg3;
+}
+
+#idle_inhibitor.activated {
+  color: @blue;
+}
+
+#pulseaudio.muted {
+  color: @fg3;
+}
+
+#tray > .needs-attention {
+  background-color: @red;
+}

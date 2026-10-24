@@ -115,6 +115,26 @@ in
   xdg.configFile."yazi/keymap.toml".source = dot + "/yazi/keymap.toml";
 
   xdg.configFile."niri/config.kdl".source = dot + "/niri/config.kdl";
+  xdg.configFile."waybar/config.jsonc".source = dot + "/waybar/config.jsonc";
+  xdg.configFile."waybar/modules.jsonc".source = dot + "/waybar/modules.jsonc";
+  xdg.configFile."waybar/style.css".source = dot + "/waybar/style.css";
+
+  # When started from niri's spawn-at-startup, it sometimes crashed right after login and never came back.
+  # niri の準備が済んでから起動し、落ちても起動し直すよう、niri.service に結び付けたユーザーサービスにする。
+  # Plasma のセッションでは niri.service が動かないので、waybar も起動しない
+  systemd.user.services.waybar = {
+    Unit = {
+      Description = "waybar for niri";
+      PartOf = [ "niri.service" ];
+      After = [ "niri.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.waybar}/bin/waybar";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "niri.service" ];
+  };
 
   # ---- Claude Code ----
   # managed-settings.json is placed in /etc/claude-code on the system side (hosts/desktop/configuration.nix)

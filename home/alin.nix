@@ -108,6 +108,7 @@ in
   home.file.".claude/skills/commit-message".source = dot + "/claude/skills/commit-message";
   home.file.".claude/writing-lint.nu".source = dot + "/claude/writing-lint.nu";
   home.file.".claude/keybindings.json".source = dot + "/claude/keybindings.json";
+  home.file.".claude/CLAUDE.md".source = dot + "/claude/CLAUDE.md";
 
   # Claude Code itself rewrites settings.json (/model, /config, etc.),
   # so instead of a link to the store, put a writable copy only when it is missing

@@ -22,7 +22,7 @@ in
       # Claude Code's clangd-lsp plugin
       clang-tools
       # For the niri session. niri uses xwayland-satellite for X11 apps if it is on PATH
-      fuzzel waybar mako xwayland-satellite
+      fuzzel waybar mako xwayland-satellite swaybg
     ])
     ++ (with pkgs-unstable; [
       zed-editor
@@ -130,6 +130,27 @@ in
     };
     Service = {
       ExecStart = "${pkgs.waybar}/bin/waybar";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "niri.service" ];
+  };
+
+  # 壁紙はモニターごとに ~/Pictures/wallpaper/<出力名> を表示する。
+  # Images are not kept in the repository, so put the image you want at this path or symlink it,
+  # then apply with systemctl --user restart swaybg
+  systemd.user.services.swaybg = {
+    Unit = {
+      Description = "swaybg wallpaper for niri";
+      PartOf = [ "niri.service" ];
+      After = [ "niri.service" ];
+    };
+    Service = {
+      ExecStart = lib.concatStringsSep " " [
+        "${pkgs.swaybg}/bin/swaybg"
+        "-o DP-3 -i %h/Pictures/wallpaper/DP-3 -m fill"
+        "-o HDMI-A-1 -i %h/Pictures/wallpaper/HDMI-A-1 -m fill"
+      ];
       Restart = "on-failure";
       RestartSec = 2;
     };

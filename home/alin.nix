@@ -21,6 +21,8 @@ in
       rustup gcc pkg-config gnumake cargo-binstall nodejs bun
       # Claude Code's clangd-lsp plugin
       clang-tools
+      # For the niri session. niri uses xwayland-satellite for X11 apps if it is on PATH
+      fuzzel waybar mako xwayland-satellite
     ])
     ++ (with pkgs-unstable; [
       zed-editor
@@ -111,6 +113,8 @@ in
   };
   xdg.configFile."yazi/yazi.toml".source = dot + "/yazi/yazi.toml";
   xdg.configFile."yazi/keymap.toml".source = dot + "/yazi/keymap.toml";
+
+  xdg.configFile."niri/config.kdl".source = dot + "/niri/config.kdl";
 
   # ---- Claude Code ----
   # managed-settings.json is placed in /etc/claude-code on the system side (hosts/desktop/configuration.nix)

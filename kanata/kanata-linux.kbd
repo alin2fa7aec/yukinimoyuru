@@ -28,6 +28,12 @@
   mh (tap-hold-press 200 200 muhenkan (layer-while-held muhenkan-layer))
   hk (tap-hold-press 200 200 henkan (layer-while-held henkan-layer))
 
+  ;; ---- leader ----
+  ;; Tap to add Meta to the next key pressed (to type niri's Mod+key without holding Mod).
+  ;; It ends when the next key is released, so holding Shift while pressing the next key gives Mod+Shift+key.
+  ;; Cancelled if no key is pressed within 2 seconds.
+  ldr (one-shot-release 2000 lmet)
+
   ;; ---- Henkan layer: symbols (fork branches on Shift) ----
   ;; note: all based on the JIS layout
   ;;
@@ -81,8 +87,9 @@
   henkan    @hk
   ;; Katakana/Hiragana -> JIS: min = - / Shift+min = =
   katakana  min
-  ;; R Alt -> コンテキストメニュー
-  ralt      menu
+  ;; Hankaku/Zenkaku (KEY_GRAVE on JIS), R Alt -> leader
+  grv       @ldr
+  ralt      @ldr
 )
 
 ;; ============================================================

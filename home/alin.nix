@@ -18,7 +18,7 @@ in
       # yazi openers (Show media info / Show EXIF)
       mediainfo exiftool
       # develop
-      rustup gcc pkg-config gnumake cargo-binstall jujutsu nodejs bun
+      rustup gcc pkg-config gnumake cargo-binstall nodejs bun
       # Claude Code's clangd-lsp plugin
       clang-tools
     ])
@@ -71,6 +71,16 @@ in
       core.editor = "vim";
       core.pager = "delta";
       interactive.diffFilter = "delta --color-only";
+    };
+  };
+
+  programs.jujutsu = {
+    enable = true;
+    settings = {
+      user.name = "alin";
+      user.email = "72394482+alin2fa7aec@users.noreply.github.com";
+      ui.default-command = "log";
+      ui.editor = "vim";
     };
   };
 

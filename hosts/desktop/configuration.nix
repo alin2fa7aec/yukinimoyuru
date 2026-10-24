@@ -32,6 +32,8 @@
     wayland.enable = true;
   };
   services.desktopManager.plasma6.enable = true;
+  # SDDM のセッション選択で Plasma と切り替える
+  programs.niri.enable = true;
   services.xserver.xkb.layout = "jp";
 
   # japanese input

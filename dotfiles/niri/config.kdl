@@ -124,6 +124,10 @@ layout {
     // Set gaps around windows in logical pixels.
     gaps 16
 
+    // The wallpaper is placed in the overview backdrop with place-within-backdrop,
+    // so make the workspace background transparent to show the wallpaper on the normal screen too
+    background-color "transparent"
+
     // When to center a column when changing focus, options are:
     // - "never", default behavior, focusing an off-screen column will keep at the left
     //   or right edge of the screen.
@@ -278,9 +282,15 @@ layout {
 // which may be more convenient to use.
 // See the binds section below for more spawn examples.
 
-// waybar は home/alin.nix の systemd ユーザーサービスで、niri.service に合わせて起動する
+// waybar と壁紙の swaybg は home/alin.nix の systemd ユーザーサービスで、niri.service に合わせて起動する
 spawn-at-startup "mako"
 spawn-at-startup "fcitx5" "-d"
+
+// Show the wallpaper behind windows in the overview too
+layer-rule {
+    match namespace="^wallpaper$"
+    place-within-backdrop true
+}
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"

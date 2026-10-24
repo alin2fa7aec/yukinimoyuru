@@ -340,6 +340,16 @@ window-rule {
     default-column-width {}
 }
 
+// wezterm has a translucent background (dotfiles/wezterm/wezterm.lua), so blur what is behind it.
+// Draw the border only outside the window so the focus ring does not show through the translucent background
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    draw-border-with-background false
+    background-effect {
+        blur true
+    }
+}
+
 // Open the Firefox picture-in-picture player as floating by default.
 window-rule {
     // This app-id regular expression will work for both:

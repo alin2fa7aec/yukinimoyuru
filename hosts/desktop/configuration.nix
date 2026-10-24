@@ -120,7 +120,15 @@
   };
   nix.optimise.automatic = true;
 
-  environment.systemPackages = with pkgs; [ git vim curl wget ];
+  environment.systemPackages = with pkgs; [ git curl wget ];
+
+  # editor: standardize on vim and leave out NixOS's default nano
+  programs.nano.enable = false;
+  programs.vim = {
+    enable = true;
+    defaultEditor = true;  # EDITOR=vim
+  };
+  environment.variables.VISUAL = "vim";
 
   system.stateVersion = "26.05";
 }

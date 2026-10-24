@@ -105,6 +105,7 @@ in
   # ---- Claude Code ----
   # managed-settings.json is placed in /etc/claude-code on the system side (hosts/desktop/configuration.nix)
   # The writing-style skill is registered on claude.ai and synced from there; only its lint is deployed here
+  home.file.".claude/skills/commit-message".source = dot + "/claude/skills/commit-message";
   home.file.".claude/writing-lint.nu".source = dot + "/claude/writing-lint.nu";
   home.file.".claude/keybindings.json".source = dot + "/claude/keybindings.json";
 

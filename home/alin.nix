@@ -23,6 +23,8 @@ in
       clang-tools
       # For the niri session. niri uses xwayland-satellite for X11 apps if it is on PATH
       fuzzel waybar swaynotificationcenter xwayland-satellite swaybg
+      # Screen lock (swaylock is used from niri's Super+Alt+L and swayidle), media keys
+      swaylock swayidle playerctl
     ])
     ++ (with pkgs-unstable; [
       zed-editor
@@ -121,6 +123,7 @@ in
   xdg.configFile."fuzzel/fuzzel.ini".source = dot + "/fuzzel/fuzzel.ini";
   xdg.configFile."swaync/config.json".source = dot + "/swaync/config.json";
   xdg.configFile."swaync/style.css".source = dot + "/swaync/style.css";
+  xdg.configFile."swaylock/config".source = dot + "/swaylock/config";
 
   # When started from niri's spawn-at-startup, it sometimes crashed right after login and never came back.
   # niri の準備が済んでから起動し、落ちても起動し直すよう、niri.service に結び付けたユーザーサービスにする。
@@ -149,6 +152,48 @@ in
     };
     Service = {
       ExecStart = "${pkgs.swaynotificationcenter}/bin/swaync";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "niri.service" ];
+  };
+
+  # 5 分操作がなければモニタを消し、10 分でロックする。スリープの前と loginctl lock-session でもロックする。
+  # While waybar's idle_inhibitor is on, niri does not report idleness, so neither happens.
+  # Start swaylock only if it is not already running, so it is not started again while locked
+  systemd.user.services.swayidle =
+    let
+      lock = "${pkgs.procps}/bin/pgrep -x swaylock || ${pkgs.swaylock}/bin/swaylock -f";
+    in
+    {
+      Unit = {
+        Description = "swayidle for niri";
+        PartOf = [ "niri.service" ];
+        After = [ "niri.service" ];
+      };
+      Service = {
+        ExecStart = lib.escapeShellArgs [
+          "${pkgs.swayidle}/bin/swayidle" "-w"
+          "timeout" "300" "${pkgs.niri}/bin/niri msg action power-off-monitors"
+          "timeout" "600" lock
+          "before-sleep" lock
+          "lock" lock
+        ];
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+      Install.WantedBy = [ "niri.service" ];
+    };
+
+  # 管理者権限が要る操作の認証ダイアログ。Plasma のセッションでは Plasma 自身が同じエージェントを起動する
+  systemd.user.services.polkit-kde-agent = {
+    Unit = {
+      Description = "KDE polkit authentication agent for niri";
+      PartOf = [ "niri.service" ];
+      After = [ "niri.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
       Restart = "on-failure";
       RestartSec = 2;
     };

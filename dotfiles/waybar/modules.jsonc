@@ -53,6 +53,26 @@
     "format-muted": "󰖁",
     "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
   },
+  // The swaync notification center. Stacks the icon and the unread count vertically.
+  // Click to toggle the panel; right-click to toggle Do Not Disturb
+  "custom/notification": {
+    "exec": "swaync-client -swb",
+    "return-type": "json",
+    "escape": true,
+    "format": "{icon}\n{text}",
+    "format-icons": {
+      "notification": "󱅫",
+      "none": "󰂜",
+      "dnd-notification": "󰂛",
+      "dnd-none": "󰂛",
+      "inhibited-notification": "󱅫",
+      "inhibited-none": "󰂜",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none": "󰂛"
+    },
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw"
+  },
   "tray": {
     "spacing": 8
   }

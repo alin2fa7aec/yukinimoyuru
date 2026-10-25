@@ -282,8 +282,8 @@ layout {
 // which may be more convenient to use.
 // See the binds section below for more spawn examples.
 
-// waybar と壁紙の swaybg は home/alin.nix の systemd ユーザーサービスで、niri.service に合わせて起動する
-spawn-at-startup "mako"
+// waybar, swaync for notifications, and swaybg for the wallpaper are systemd user services in home/alin.nix, started along with niri.service
+
 spawn-at-startup "fcitx5" "-d"
 
 // Show the wallpaper behind windows in the overview too
@@ -621,6 +621,9 @@ binds {
     // Show or hide the waybar on the 4K monitor. The other bar ignores SIGUSR1 (dotfiles/waybar/config.jsonc)
     // On NixOS, waybar runs as .waybar-wrapped from a wrapper, so do not match exactly with -x
     Mod+S hotkey-overlay-title="Toggle the 4K Bar" { spawn "pkill" "-USR1" "waybar"; }
+
+    // Toggle the swaync notification center (same as clicking the notification box in waybar)
+    Mod+N hotkey-overlay-title="Toggle Notification Center" { spawn "swaync-client" "-t" "-sw"; }
 
     // Select a region and capture it (same as Win+Shift+S on Windows)
     Mod+Shift+S { screenshot; }

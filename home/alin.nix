@@ -22,7 +22,7 @@ in
       # Claude Code's clangd-lsp plugin
       clang-tools
       # For the niri session. niri uses xwayland-satellite for X11 apps if it is on PATH
-      fuzzel waybar mako xwayland-satellite swaybg
+      fuzzel waybar swaynotificationcenter xwayland-satellite swaybg
     ])
     ++ (with pkgs-unstable; [
       zed-editor
@@ -118,6 +118,9 @@ in
   xdg.configFile."waybar/config.jsonc".source = dot + "/waybar/config.jsonc";
   xdg.configFile."waybar/modules.jsonc".source = dot + "/waybar/modules.jsonc";
   xdg.configFile."waybar/style.css".source = dot + "/waybar/style.css";
+  xdg.configFile."fuzzel/fuzzel.ini".source = dot + "/fuzzel/fuzzel.ini";
+  xdg.configFile."swaync/config.json".source = dot + "/swaync/config.json";
+  xdg.configFile."swaync/style.css".source = dot + "/swaync/style.css";
 
   # When started from niri's spawn-at-startup, it sometimes crashed right after login and never came back.
   # niri の準備が済んでから起動し、落ちても起動し直すよう、niri.service に結び付けたユーザーサービスにする。
@@ -130,6 +133,22 @@ in
     };
     Service = {
       ExecStart = "${pkgs.waybar}/bin/waybar";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "niri.service" ];
+  };
+
+  # 通知は swaync に任せる。waybar と同じく niri.service に結び付け、Plasma のセッションでは起動しない。
+  # Plasma では plasmashell が通知を受け持つので、両方が動くと通知の受け取り手を取り合う
+  systemd.user.services.swaync = {
+    Unit = {
+      Description = "swaync notification center for niri";
+      PartOf = [ "niri.service" ];
+      After = [ "niri.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.swaynotificationcenter}/bin/swaync";
       Restart = "on-failure";
       RestartSec = 2;
     };

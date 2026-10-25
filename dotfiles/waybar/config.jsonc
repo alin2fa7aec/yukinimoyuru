@@ -10,7 +10,7 @@
     "position": "right",
     "width": 88,
     "on-sigusr1": "noop",
-    "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock", "tray"],
+    "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock", "custom/notification", "tray"],
     "include": ["~/.config/waybar/modules.jsonc"]
   },
   {
@@ -22,7 +22,7 @@
     "start_hidden": true,
     "layer": "top",
     "exclusive": false,
-    "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock"],
+    "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock", "custom/notification"],
     "include": ["~/.config/waybar/modules.jsonc"]
   },
   {

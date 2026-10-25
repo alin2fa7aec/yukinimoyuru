@@ -646,7 +646,8 @@ binds {
 
     // The quit action will show a confirmation dialog to avoid accidental exits.
     Mod+Shift+E { quit; }
-    Ctrl+Alt+Delete { quit; }
+    // As in KDE, Ctrl+Alt+Delete opens a power menu to choose lock, log out, reboot, and so on (power-menu in home/alin.nix)
+    Ctrl+Alt+Delete hotkey-overlay-title="Power Menu" { spawn "power-menu"; }
 
     // Powers off the monitors. To turn them back on, do any input like
     // moving the mouse or pressing any other key.

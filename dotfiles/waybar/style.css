@@ -65,7 +65,8 @@ tooltip label {
 #idle_inhibitor,
 #pulseaudio,
 #clock,
-#custom-notification {
+#custom-notification,
+#custom-power {
   margin: 0;
   background-repeat: no-repeat;
 }
@@ -79,12 +80,17 @@ tooltip label {
   font-size: 12px;
 }
 
-#custom-overview {
+#custom-overview,
+#custom-power {
   font-size: 18px;
 }
 
 #custom-overview:hover {
   color: @cyan;
+}
+
+#custom-power:hover {
+  color: @red;
 }
 
 /* On the QHD bar, the tray follows the notifications.
@@ -270,6 +276,26 @@ window#waybar.right #custom-notification {
     linear-gradient(@glass, @glass);
   background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 31px, 6px 1px, 1px 59px, 13px 1px, 1px 6px, 1px 6px, 27px 1px, 1px 8px, 38px 38px;
   background-position: 12px 12px, 12px 49px, 12px 12px, 49px 12px, 56px 0px, 50px 30px, 84px 0px, 72px 58px, 72px 58px, 30px 50px, 30px 56px, 56px 56px, 12px 12px;
+}
+
+/* 電源の箱はバーの下端に、ほかの箱から離して置く。
+   上の箱とはつながないので、箱から上へ伸びる 2 本の線は上に行くほど消えていくようにし、
+   左の線と箱の下からの線は画面の下端まで下ろす */
+#custom-power {
+  padding: 60px 10px 16px 40px;
+  min-height: 38px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire-end, @wire),
+    linear-gradient(@wire-end, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 60px, 1px 84px, 20px 1px, 1px 16px, 38px 38px;
+  background-position: 40px 60px, 40px 97px, 40px 60px, 77px 60px, 58px 0px, 20px 30px, 20px 80px, 70px 98px, 40px 60px;
 }
 
 #workspaces button:nth-child(3n+1) {

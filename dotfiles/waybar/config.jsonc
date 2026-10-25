@@ -1,7 +1,8 @@
 // One vertical bar per monitor, each on the side where the monitors meet.
 // Output names and left/right placement match the outputs in dotfiles/niri/config.kdl.
 // niri's Mod+S sends SIGUSR1 to waybar. Bars other than the 4K one set on-sigusr1 to noop, so only the 4K bar is shown or hidden.
-// 縦のバーはモジュールをすべて modules-left に入れて上端から詰め、style.css で箱を左右に散らして折れ線でつなぐ。
+// The vertical bars put every module except the power box in modules-left, packed from the top; style.css scatters the boxes left and right and connects them with polylines.
+// The power box goes in modules-right at the bottom.
 // Box positions and lines assume this order, so update style.css when changing it.
 [
   {
@@ -11,6 +12,7 @@
     "width": 88,
     "on-sigusr1": "noop",
     "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock", "custom/notification", "tray"],
+    "modules-right": ["custom/power"],
     "include": ["~/.config/waybar/modules.jsonc"]
   },
   {
@@ -23,6 +25,7 @@
     "layer": "top",
     "exclusive": false,
     "modules-left": ["custom/overview", "niri/workspaces", "cpu", "memory", "idle_inhibitor", "pulseaudio", "clock", "custom/notification"],
+    "modules-right": ["custom/power"],
     "include": ["~/.config/waybar/modules.jsonc"]
   },
   {

@@ -3,7 +3,7 @@
   // Click to toggle niri's overview, for rearranging windows with the mouse alone
   "custom/overview": {
     "format": "󱒆",
-    "tooltip-format": "オーバービュー",
+    "tooltip": false,
     "on-click": "niri msg action toggle-overview"
   },
   // Icons come from Symbols Nerd Font (set in style.css).
@@ -72,6 +72,12 @@
     },
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw"
+  },
+  // Open the power menu (power-menu in home/alin.nix)
+  "custom/power": {
+    "format": "󰐥",
+    "tooltip": false,
+    "on-click": "power-menu"
   },
   "tray": {
     "spacing": 8

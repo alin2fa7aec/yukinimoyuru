@@ -28,6 +28,14 @@ in
       # Clipboard history (niri's Mod+V)
       cliphist wl-clipboard
     ])
+    ++ [
+      # Power menu (niri's Ctrl+Alt+Delete and the power box in waybar)
+      (pkgs.writeShellApplication {
+        name = "power-menu";
+        runtimeInputs = [ pkgs.fuzzel ];
+        text = builtins.readFile (dot + "/fuzzel/power-menu.sh");
+      })
+    ]
     ++ (with pkgs-unstable; [
       zed-editor
       wezterm

@@ -25,6 +25,8 @@ in
       fuzzel waybar swaynotificationcenter xwayland-satellite swaybg
       # Screen lock (swaylock is used from niri's Super+Alt+L and swayidle), media keys
       swaylock swayidle playerctl
+      # Clipboard history (niri's Mod+V)
+      cliphist wl-clipboard
     ])
     ++ (with pkgs-unstable; [
       zed-editor
@@ -194,6 +196,22 @@ in
     };
     Service = {
       ExecStart = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "niri.service" ];
+  };
+
+  # コピーしたものを cliphist の履歴に記録する。niri の Mod+V で fuzzel から選び直す。
+  # Plasma のセッションでは Klipper が同じ役をするので、niri.service に結び付ける
+  systemd.user.services.cliphist = {
+    Unit = {
+      Description = "cliphist clipboard history for niri";
+      PartOf = [ "niri.service" ];
+      After = [ "niri.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
       Restart = "on-failure";
       RestartSec = 2;
     };

@@ -602,7 +602,8 @@ binds {
     Mod+Shift+Semicolon { set-column-width "-10%"; }
 
     // Move the focused window between the floating and the tiling layout.
-    Mod+V       { toggle-window-floating; }
+    // Mod+V is used for clipboard history, so move the floating toggle to Mod+Ctrl+V
+    Mod+Ctrl+V  { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
 
     // Toggle tabbed column display mode.
@@ -621,6 +622,11 @@ binds {
     // Show or hide the waybar on the 4K monitor. The other bar ignores SIGUSR1 (dotfiles/waybar/config.jsonc)
     // On NixOS, waybar runs as .waybar-wrapped from a wrapper, so do not match exactly with -x
     Mod+S hotkey-overlay-title="Toggle the 4K Bar" { spawn "pkill" "-USR1" "waybar"; }
+
+    // クリップボード履歴を fuzzel で選び、選んだものをクリップボードに入れる (KDE の Klipper と同じ Meta+V)。
+    // kanata's Muhenkan+V sends this key too. The history is recorded by the cliphist service in home/alin.nix.
+    // Pass to wl-copy only when something is chosen, so closing with Esc does not overwrite the clipboard with nothing
+    Mod+V hotkey-overlay-title="Clipboard History" { spawn-sh r#"sel=$(cliphist list | fuzzel --dmenu --only-match --with-nth=2 --placeholder=Clipboard) && printf '%s\n' "$sel" | cliphist decode | wl-copy"#; }
 
     // Toggle the swaync notification center (same as clicking the notification box in waybar)
     Mod+N hotkey-overlay-title="Toggle Notification Center" { spawn "swaync-client" "-t" "-sw"; }

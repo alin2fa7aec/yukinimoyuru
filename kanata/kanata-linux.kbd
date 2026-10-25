@@ -70,7 +70,7 @@
   m-e (macro C-left 5 C-S-rght)
   ;; Ctrl+Shift+\
   edit-w C-S-yen
-  ;; Meta+V (KDE Plasma: Klipper のクリップボード履歴ポップアップ)
+  ;; Meta+V (クリップボード履歴。KDE Plasma では Klipper、niri では cliphist を fuzzel で選ぶ)
   clip M-v
   ;; 再変換: fcitx5-mozc (MS-IME 風キー設定) では IME 有効・未入力状態の 変換 キーが再変換に割り当てられている。
   ;; アプリ側が surrounding text に対応していないと選択範囲を取得できず動作しない。

@@ -1,0 +1,25 @@
+/* nordfox (nightfox.nvim) の配色。waybar と wezterm のテーマと合わせる。
+   swaync reads its bundled style.css first and layers this file on top, so only override the variables the bundled CSS uses */
+:root {
+  /* The notification center panel. Translucent bg1, the same as the waybar boxes */
+  --cc-bg: rgba(46, 52, 64, 0.85);
+
+  /* 通知 1 件ごとの箱。--noti-bg は R, G, B の 3 つの数で書く */
+  --noti-border-color: rgba(205, 206, 207, 0.25);
+  --noti-bg: 46, 52, 64;
+  --noti-bg-alpha: 0.92;
+  --noti-bg-darker: #232831;
+  --noti-bg-hover: #39404f;
+  --noti-bg-focus: rgba(62, 74, 91, 0.8);
+  --noti-close-bg: #444c5e;
+  --noti-close-bg-hover: #5a657d;
+
+  --text-color: #cdcecf;
+  --text-color-disabled: #7e8188;
+
+  /* Toggles and buttons use blue for selection */
+  --bg-selected: #81a1c1;
+
+  /* Square corners, matching the waybar boxes */
+  --border-radius: 0px;
+}

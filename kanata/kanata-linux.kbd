@@ -81,6 +81,8 @@
 ;; Base layer
 ;; ============================================================
 (deflayermap (base)
+  ;; Caps Lock (the Eisu key on JIS) -> left Ctrl
+  caps      lctl
   ;; Muhenkan -> hold to activate the layer
   muhenkan  @mh
   ;; Henkan -> hold to activate the layer

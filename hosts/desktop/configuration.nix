@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-unstable, inputs, ... }:
+{ config, lib, pkgs, pkgs-unstable, inputs, ... }:
 {
   imports = [ ./hardware-configuration.nix ];
 
@@ -27,13 +27,29 @@
   };
 
   # desktop
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-  };
-  services.desktopManager.plasma6.enable = true;
-  # SDDM のセッション選択で Plasma と切り替える
+  # niri is the only desktop.
+  # The niri module provides the file chooser (xdg-desktop-portal-gnome and Nautilus) and password storage (gnome-keyring)
   programs.niri.enable = true;
+  # Login screen. niri is the only session, so tuigreet starts niri-session
+  services.greetd = {
+    enable = true;
+    useTextGreeter = true;
+    settings.default_session.command = lib.escapeShellArgs [
+      "${pkgs.tuigreet}/bin/tuigreet"
+      "--time"
+      "--remember"
+      "--asterisks"
+      "--cmd"
+      "niri-session"
+    ];
+  };
+  # Where home-manager's dconf.settings (GTK dark mode) writes. The Plasma module used to enable this
+  programs.dconf.enable = true;
+  # The app xdg-open uses for directories. Otherwise zathura-cb (a comic book plugin), which claims to handle directories, gets picked.
+  # Zen Browser rewrites ~/.config/mimeapps.list, so write to /etc/xdg/mimeapps.list
+  xdg.mime.defaultApplications."inode/directory" = "dev.zed.Zed.desktop";
+  # blueman-applet for the waybar tray, and the Bluetooth settings
+  services.blueman.enable = true;
   services.xserver.xkb.layout = "jp";
 
   # japanese input
@@ -132,7 +148,9 @@
   };
   nix.optimise.automatic = true;
 
-  environment.systemPackages = with pkgs; [ git curl wget ];
+  environment.systemPackages = with pkgs; [
+    git curl wget
+  ];
 
   # editor: standardize on vim and leave out NixOS's default nano
   programs.nano.enable = false;

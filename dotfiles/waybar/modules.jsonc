@@ -48,10 +48,12 @@
       }
     }
   },
+  // Click to toggle mute; right-click to open pavucontrol for fine control of output and volume
   "pulseaudio": {
     "format": "󰕾\n{volume}",
     "format-muted": "󰖁",
-    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "pavucontrol"
   },
   // The swaync notification center. Stacks the icon and the unread count vertically.
   // Click to toggle the panel; right-click to toggle Do Not Disturb

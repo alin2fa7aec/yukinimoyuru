@@ -12,6 +12,79 @@ let
       )
     )
   );
+  # Color scheme files for qt5ct and qt6ct. Colors are listed in QPalette ColorRole order (WindowText, Button, ..., Accent).
+  # Qt 5 has no Accent, so qt5ct gets only the first 21 colors (n picks the count).
+  # Only disabled text is dimmed to fg3; everything else uses the same colors for active and inactive
+  qtColors =
+    n:
+    let
+      palette =
+        disabled:
+        let
+          text = if disabled then nordfox.fg3 else nordfox.fg1;
+        in
+        lib.concatStringsSep ", " (
+          lib.take n (
+            with nordfox;
+            [
+              text # WindowText
+              bg2 # Button
+              bg4 # Light
+              bg3 # Midlight
+              bg0 # Dark
+              bg2 # Mid
+              text # Text
+              white # BrightText
+              text # ButtonText
+              bg0 # Base
+              bg1 # Window
+              "#000000" # Shadow
+              sel0 # Highlight
+              fg1 # HighlightedText
+              blue # Link
+              magenta # LinkVisited
+              bg1 # AlternateBase
+              "#000000" # NoRole
+              bg2 # ToolTipBase
+              fg1 # ToolTipText
+              fg3 # PlaceholderText
+              blue # Accent
+            ]
+          )
+        );
+    in
+    lib.generators.toINI { } {
+      ColorScheme = {
+        active_colors = palette false;
+        inactive_colors = palette false;
+        disabled_colors = palette true;
+      };
+    };
+  # User services for applets shown in the waybar tray
+  applet = description: exec: {
+    Unit = {
+      Description = description;
+      PartOf = [ "niri.service" ];
+      After = [ "waybar.service" ];
+      Wants = [ "waybar.service" ];
+    };
+    Service = {
+      ExecStart = exec;
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "niri.service" ];
+  };
+  qtctSettings = name: {
+    Appearance = {
+      style = "Fusion";
+      custom_palette = true;
+      color_scheme_path = "${config.xdg.configHome}/${name}/colors/nordfox.conf";
+      icon_theme = "Papirus-Dark";
+      # Leave file chooser and similar dialogs to the portal (Nautilus), consistent with GTK apps
+      standard_dialogs = "xdgdesktopportal";
+    };
+  };
 in
 {
   home.username = "alin";
@@ -37,6 +110,10 @@ in
       swaylock swayidle playerctl
       # Clipboard history (niri's Mod+V)
       cliphist wl-clipboard
+      # Volume settings (right-click the volume box in waybar), network settings (nm-applet and nm-connection-editor)
+      pavucontrol networkmanagerapplet
+      # PDF and image viewers. File operations are done in yazi
+      zathura imv
     ])
     ++ [
       # Power menu (niri's Ctrl+Alt+Delete and the power box in waybar)
@@ -91,7 +168,7 @@ in
   # Create only ~/downloads in the home directory.
   # xdg-user-dirs-update fills in directories missing from user-dirs.dirs with defaults like ~/Pictures,
   # so disable unused ones by setting them to $HOME (user-dirs.dirs(5)).
-  # home-manager は user-dirs.conf に enabled=False も書くので、Plasma のログイン時にも作り直されない
+  # home-manager also writes enabled=False to user-dirs.conf, so they are not recreated at login
   xdg.userDirs =
     let
       home = config.home.homeDirectory;
@@ -111,14 +188,44 @@ in
     };
 
   # ---- fonts ----
-  # Plasma のフォント設定はアンチエイリアスなどを conf.d/10-hm-fonts.conf に書き込み、リンクを通常のファイルに置き換える。
-  # すると次の activation で backup が衝突して止まるので、同じ設定をここで持ち、ファイルは上書きさせる
+  # Carry over the values chosen in Plasma's font settings
   fonts.fontconfig = {
     antialiasing = true;
     hinting = "slight";
     subpixelRendering = "vertical-bgr";
   };
-  xdg.configFile."fontconfig/conf.d/10-hm-fonts.conf".force = true;
+
+  # ---- look ----
+  # Theme GTK and Qt apps with nordfox. Colors come from dotfiles/theme/nordfox.css.
+  # GTK overrides libadwaita's named colors on top of adw-gtk3 dark; Qt passes the nordfox palette to qt6ct's Fusion
+  gtk = {
+    enable = true;
+    theme = { name = "adw-gtk3-dark"; package = pkgs.adw-gtk3; };
+    iconTheme = { name = "Papirus-Dark"; package = pkgs.papirus-icon-theme; };
+    gtk3.extraCss = builtins.readFile (dot + "/theme/gtk.css");
+    gtk4.extraCss = builtins.readFile (dot + "/theme/gtk.css");
+  };
+  # @import in gtk.css resolves relative to gtk-3.0 and gtk-4.0
+  xdg.configFile."gtk-3.0/nordfox.css".source = dot + "/theme/nordfox.css";
+  xdg.configFile."gtk-4.0/nordfox.css".source = dot + "/theme/nordfox.css";
+  # libadwaita apps and the portal decide dark mode from this setting, not the theme name
+  dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+
+  home.pointerCursor = {
+    name = "Adwaita";
+    package = pkgs.adwaita-icon-theme;
+    size = 24;
+    gtk.enable = true;
+  };
+
+  qt = {
+    enable = true;
+    platformTheme.name = "qtct";
+    qt6ctSettings = qtctSettings "qt6ct";
+    qt5ctSettings = qtctSettings "qt5ct";
+  };
+  xdg.configFile."qt6ct/colors/nordfox.conf".text = qtColors 22;
+  xdg.configFile."qt5ct/colors/nordfox.conf".text = qtColors 21;
 
   # ---- input method ----
   # karukan's system dictionary. It is not bundled with the IME, so put the prebuilt release dictionary at the default path
@@ -258,8 +365,7 @@ in
   xdg.configFile."swaylock/config".source = dot + "/swaylock/config";
 
   # When started from niri's spawn-at-startup, it sometimes crashed right after login and never came back.
-  # niri の準備が済んでから起動し、落ちても起動し直すよう、niri.service に結び付けたユーザーサービスにする。
-  # Plasma のセッションでは niri.service が動かないので、waybar も起動しない
+  # Make it a user service bound to niri.service so it starts once niri is ready and restarts if it crashes
   systemd.user.services.waybar = {
     Unit = {
       Description = "waybar for niri";
@@ -274,8 +380,7 @@ in
     Install.WantedBy = [ "niri.service" ];
   };
 
-  # 通知は swaync に任せる。waybar と同じく niri.service に結び付け、Plasma のセッションでは起動しない。
-  # Plasma では plasmashell が通知を受け持つので、両方が動くと通知の受け取り手を取り合う
+  # Leave notifications to swaync. Bound to niri.service like waybar
   systemd.user.services.swaync = {
     Unit = {
       Description = "swaync notification center for niri";
@@ -317,23 +422,22 @@ in
       Install.WantedBy = [ "niri.service" ];
     };
 
-  # 管理者権限が要る操作の認証ダイアログ。Plasma のセッションでは Plasma 自身が同じエージェントを起動する
-  systemd.user.services.polkit-kde-agent = {
+  # Authentication dialog for operations that need admin privileges
+  systemd.user.services.polkit-gnome-agent = {
     Unit = {
-      Description = "KDE polkit authentication agent for niri";
+      Description = "GNOME polkit authentication agent for niri";
       PartOf = [ "niri.service" ];
       After = [ "niri.service" ];
     };
     Service = {
-      ExecStart = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
       Restart = "on-failure";
       RestartSec = 2;
     };
     Install.WantedBy = [ "niri.service" ];
   };
 
-  # コピーしたものを cliphist の履歴に記録する。niri の Mod+V で fuzzel から選び直す。
-  # Plasma のセッションでは Klipper が同じ役をするので、niri.service に結び付ける
+  # Record copied content in the cliphist history. Pick it again from fuzzel with niri's Mod+V
   systemd.user.services.cliphist = {
     Unit = {
       Description = "cliphist clipboard history for niri";
@@ -347,6 +451,11 @@ in
     };
     Install.WantedBy = [ "niri.service" ];
   };
+
+  # Show the network and Bluetooth applets in the waybar tray.
+  # waybar provides the tray (StatusNotifierWatcher), so start after waybar
+  systemd.user.services.nm-applet = applet "NetworkManager applet for niri" "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator";
+  systemd.user.services.blueman-applet = applet "blueman applet for niri" "${pkgs.blueman}/bin/blueman-applet";
 
   # Each monitor shows ~/.local/share/wallpaper/<output name> as its wallpaper.
   # Images are not kept in the repository, so put the image you want at this path or symlink it,

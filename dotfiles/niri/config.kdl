@@ -286,6 +286,14 @@ layout {
 
 spawn-at-startup "fcitx5" "-d"
 
+// home/alin.nix writes the GTK and Qt appearance settings (QT_QPA_PLATFORMTHEME etc.) to the systemd user environment, so apps launched from niri get them too
+
+// Use Adwaita for the cursor, the same as home.pointerCursor in home/alin.nix
+cursor {
+    xcursor-theme "Adwaita"
+    xcursor-size 24
+}
+
 // Show the wallpaper behind windows in the overview too
 layer-rule {
     match namespace="^wallpaper$"
@@ -623,7 +631,7 @@ binds {
     // On NixOS, waybar runs as .waybar-wrapped from a wrapper, so do not match exactly with -x
     Mod+S hotkey-overlay-title="Toggle the 4K Bar" { spawn "pkill" "-USR1" "waybar"; }
 
-    // クリップボード履歴を fuzzel で選び、選んだものをクリップボードに入れる (KDE の Klipper と同じ Meta+V)。
+    // Pick from the clipboard history with fuzzel and put the choice on the clipboard (Meta+V, as on Windows and KDE).
     // kanata's Muhenkan+V sends this key too. The history is recorded by the cliphist service in home/alin.nix.
     // Pass to wl-copy only when something is chosen, so closing with Esc does not overwrite the clipboard with nothing
     Mod+V hotkey-overlay-title="Clipboard History" { spawn-sh r#"sel=$(cliphist list | fuzzel --dmenu --only-match --with-nth=2 --placeholder=Clipboard) && printf '%s\n' "$sel" | cliphist decode | wl-copy"#; }

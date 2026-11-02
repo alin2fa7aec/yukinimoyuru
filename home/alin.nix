@@ -100,6 +100,16 @@ in
       videos = home;
     };
 
+  # ---- fonts ----
+  # Plasma のフォント設定はアンチエイリアスなどを conf.d/10-hm-fonts.conf に書き込み、リンクを通常のファイルに置き換える。
+  # すると次の activation で backup が衝突して止まるので、同じ設定をここで持ち、ファイルは上書きさせる
+  fonts.fontconfig = {
+    antialiasing = true;
+    hinting = "slight";
+    subpixelRendering = "vertical-bgr";
+  };
+  xdg.configFile."fontconfig/conf.d/10-hm-fonts.conf".force = true;
+
   # ---- input method ----
   # karukan's system dictionary. It is not bundled with the IME, so put the prebuilt release dictionary at the default path
   home.file.".local/share/karukan-im/dict.bin".source = "${pkgs.fetchzip {

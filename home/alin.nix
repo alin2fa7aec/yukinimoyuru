@@ -77,6 +77,16 @@ in
     enableBashIntegration = false;
   };
 
+  # ---- input method ----
+  # karukan's system dictionary. It is not bundled with the IME, so put the prebuilt release dictionary at the default path
+  home.file.".local/share/karukan-im/dict.bin".source = "${pkgs.fetchzip {
+    url = "https://github.com/togatoga/karukan/releases/download/v0.1.0/dict.tgz";
+    hash = "sha256-gWUZH3FQfuksslb/AqUvBU0OVFe9DMg0+8SpGHlASqA=";
+    stripRoot = false;
+  }}/dict.bin";
+  # karukan only reads its config file and never writes it, so a link is fine
+  xdg.configFile."karukan-im/config.toml".source = dot + "/karukan/config.toml";
+
   # ---- tools ----
   programs.git = {
     enable = true;

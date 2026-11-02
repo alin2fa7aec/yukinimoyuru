@@ -35,6 +35,8 @@ in
         runtimeInputs = [ pkgs.fuzzel ];
         text = builtins.readFile (dot + "/fuzzel/power-menu.sh");
       })
+      # zed-editor from nixpkgs installs as zeditor, so make it launchable as zed too
+      (pkgs.writeShellScriptBin "zed" ''exec ${pkgs-unstable.zed-editor}/bin/zeditor "$@"'')
     ]
     ++ (with pkgs-unstable; [
       zed-editor

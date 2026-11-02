@@ -1,0 +1,23 @@
+# karukan settings. Unset items fall back to the defaults in karukan-im/core/config/default.toml.
+# After changing, restart with fcitx5 -r -d to apply
+
+[conversion]
+# Bias conversion toward this word. Up to the last 25 characters are used
+persona = "ソフトウェアエンジニア"
+
+[learning]
+enabled = true
+
+# Keep only 、。・「」 and the ー entered by romaji rules as Japanese symbols, and input everything else as ASCII
+[symbol]
+punctuation = "、。"
+bracket = "「」"
+slash = "・"
+space = "half"
+
+# Latin letters are always ASCII even during kana input; there is no width setting
+[width]
+kana_symbol = "full"
+# ?! ,. (){}[] <>=+-/* "' :; ~ #%&@$^_|`\ are made half-width. ？！ are in this group too, so they become !?
+ascii_symbol = "half"
+digit = "half"

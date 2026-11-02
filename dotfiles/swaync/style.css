@@ -1,25 +1,36 @@
-/* nordfox (nightfox.nvim) の配色。waybar と wezterm のテーマと合わせる。
+/* nordfox (nightfox.nvim) colors. The palette is shared with waybar and fcitx5 (dotfiles/theme/nordfox.css).
    swaync reads its bundled style.css first and layers this file on top, so only override the variables the bundled CSS uses */
+@import url("nordfox.css");
+
 :root {
   /* The notification center panel. Translucent bg1, the same as the waybar boxes */
-  --cc-bg: rgba(46, 52, 64, 0.85);
+  --cc-bg: alpha(@bg1, 0.85);
 
-  /* 通知 1 件ごとの箱。--noti-bg は R, G, B の 3 つの数で書く */
-  --noti-border-color: rgba(205, 206, 207, 0.25);
-  --noti-bg: 46, 52, 64;
-  --noti-bg-alpha: 0.92;
-  --noti-bg-darker: #232831;
-  --noti-bg-hover: #39404f;
-  --noti-bg-focus: rgba(62, 74, 91, 0.8);
-  --noti-close-bg: #444c5e;
-  --noti-close-bg-hover: #5a657d;
+  /* The box for each notification */
+  --noti-border-color: alpha(@fg1, 0.25);
+  --noti-bg-darker: @bg0;
+  --noti-bg-hover: @bg2;
+  --noti-bg-focus: alpha(@sel0, 0.8);
+  --noti-close-bg: @bg3;
+  --noti-close-bg-hover: @bg4;
 
-  --text-color: #cdcecf;
-  --text-color-disabled: #7e8188;
+  --text-color: @fg1;
+  --text-color-disabled: @fg3;
 
   /* Toggles and buttons use blue for selection */
-  --bg-selected: #81a1c1;
+  --bg-selected: @blue;
 
   /* Square corners, matching the waybar boxes */
   --border-radius: 0px;
+}
+
+/* The bundled CSS writes the notification background as rgba(var(--noti-bg), ...), expecting --noti-bg to be three numbers R, G, B.
+   That form cannot be made from the palette colors, so override the selectors that use --noti-bg with the same specificity */
+.notification-row .notification-background .notification,
+.notification-row .notification-background .notification .notification-default-action .notification-content .inline-reply .inline-reply-button {
+  background: alpha(@bg1, 0.92);
+}
+
+.notification-group.collapsed .notification-row .notification {
+  background-color: @bg1;
 }

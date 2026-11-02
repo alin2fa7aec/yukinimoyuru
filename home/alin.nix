@@ -2,6 +2,16 @@
 let
   dot = ../dotfiles;
   nushellDir = builtins.path { path = dot + "/nushell"; name = "nushell-config"; };
+  # Turn "@define-color name #rrggbb;" lines in nordfox.css into { name = "#rrggbb"; }. Used for the fcitx5 theme, which cannot read CSS
+  nordfox = lib.listToAttrs (
+    map (m: lib.nameValuePair (lib.elemAt m 0) (lib.elemAt m 1)) (
+      lib.filter (m: m != null) (
+        map (builtins.match "@define-color ([a-z0-9]+) (#[0-9a-f]{6});") (
+          lib.splitString "\n" (builtins.readFile (dot + "/theme/nordfox.css"))
+        )
+      )
+    )
+  );
 in
 {
   home.username = "alin";
@@ -120,6 +130,70 @@ in
   # karukan only reads its config file and never writes it, so a link is fine
   xdg.configFile."karukan-im/config.toml".source = dot + "/karukan/config.toml";
 
+  # nordfox theme for the candidate window. fcitx5's classicui draws it, so it applies to input methods other than karukan too.
+  # Colors match fuzzel: a bg1 background with a thin blue border, and sel0 for the selected candidate.
+  # Images such as the paging arrows are borrowed from the bundled default-dark. The theme in use is selected in hosts/desktop/configuration.nix
+  xdg.dataFile =
+    let
+      themeDir = "fcitx5/themes/nordfox";
+      defaultDark = "${pkgs.fcitx5}/share/fcitx5/themes/default-dark";
+      margin = n: { Left = n; Right = n; Top = n; Bottom = n; };
+    in
+    {
+      "${themeDir}/theme.conf".text = lib.generators.toINI { } {
+        Metadata = {
+          Name = "Nordfox";
+          Version = 1;
+          Author = "alin";
+          Description = "nordfox (nightfox.nvim)";
+          ScaleWithDPI = "True";
+        };
+        InputPanel = {
+          NormalColor = nordfox.fg1;
+          HighlightCandidateColor = nordfox.fg1;
+          # The part of the preedit string currently being converted
+          HighlightColor = nordfox.cyan;
+          HighlightBackgroundColor = nordfox.sel0;
+          PageButtonAlignment = "Last Candidate";
+        };
+        "InputPanel/TextMargin" = margin 5;
+        "InputPanel/ContentMargin" = margin 2;
+        "InputPanel/Background" = {
+          Color = nordfox.bg1;
+          BorderColor = nordfox.blue;
+          BorderWidth = 1;
+        };
+        "InputPanel/Background/Margin" = margin 1;
+        "InputPanel/Highlight".Color = nordfox.sel0;
+        "InputPanel/Highlight/Margin" = margin 5;
+        "InputPanel/PrevPage".Image = "prev.png";
+        "InputPanel/PrevPage/ClickMargin" = margin 5;
+        "InputPanel/NextPage".Image = "next.png";
+        "InputPanel/NextPage/ClickMargin" = margin 5;
+        Menu = {
+          NormalColor = nordfox.fg1;
+          HighlightCandidateColor = nordfox.fg1;
+        };
+        "Menu/Background" = {
+          Color = nordfox.bg1;
+          BorderColor = nordfox.blue;
+          BorderWidth = 1;
+        };
+        "Menu/Background/Margin" = margin 1;
+        "Menu/ContentMargin" = margin 2;
+        "Menu/Highlight".Color = nordfox.sel0;
+        "Menu/Highlight/Margin" = margin 5;
+        "Menu/Separator".Color = nordfox.bg3;
+        "Menu/CheckBox".Image = "radio.png";
+        "Menu/SubMenu".Image = "arrow.png";
+        "Menu/TextMargin" = margin 5;
+      };
+    }
+    // lib.listToAttrs (map
+      (f: lib.nameValuePair "${themeDir}/${f}" { source = "${defaultDark}/${f}"; })
+      [ "prev.png" "next.png" "radio.png" "arrow.png" ]
+    );
+
   # ---- tools ----
   programs.git = {
     enable = true;
@@ -175,9 +249,12 @@ in
   xdg.configFile."waybar/config.jsonc".source = dot + "/waybar/config.jsonc";
   xdg.configFile."waybar/modules.jsonc".source = dot + "/waybar/modules.jsonc";
   xdg.configFile."waybar/style.css".source = dot + "/waybar/style.css";
+  # @import in style.css resolves relative to ~/.config/waybar, so put it in the same directory
+  xdg.configFile."waybar/nordfox.css".source = dot + "/theme/nordfox.css";
   xdg.configFile."fuzzel/fuzzel.ini".source = dot + "/fuzzel/fuzzel.ini";
   xdg.configFile."swaync/config.json".source = dot + "/swaync/config.json";
   xdg.configFile."swaync/style.css".source = dot + "/swaync/style.css";
+  xdg.configFile."swaync/nordfox.css".source = dot + "/theme/nordfox.css";
   xdg.configFile."swaylock/config".source = dot + "/swaylock/config";
 
   # When started from niri's spawn-at-startup, it sometimes crashed right after login and never came back.

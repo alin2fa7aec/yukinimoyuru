@@ -1,12 +1,5 @@
-/* nordfox (nightfox.nvim) の配色。wezterm のテーマと合わせる */
-@define-color bg0 #232831;
-@define-color bg1 #2e3440;
-@define-color bg3 #444c5e;
-@define-color fg1 #cdcecf;
-@define-color fg3 #7e8188;
-@define-color blue #81a1c1;
-@define-color cyan #88c0d0;
-@define-color red #bf616a;
+/* nordfox (nightfox.nvim) colors. The palette is shared with swaync and fcitx5 (dotfiles/theme/nordfox.css) */
+@import url("nordfox.css");
 
 /* Following Rainmeter's Cubes 2, modules are translucent square boxes of different sizes that look connected by thin lines.
    glass is the inside of a box, edge its border, edge-hi the border of the visible workspace, and wire the color of the lines between boxes.

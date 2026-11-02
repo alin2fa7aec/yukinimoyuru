@@ -1,6 +1,6 @@
 ;; require kanata v1.11.0
 ;;
-;; Linux (NixOS / KDE Plasma) 用 kanata スクリプトファイル
+;; kanata configuration for Linux (NixOS / niri)
 ;;
 ;; note: Output is interpreted by the OS keyboard layout, so symbol aliases are written with JIS layout key codes.
 ;;       Set the OS layout to Japanese (jp).
@@ -70,7 +70,7 @@
   m-e (macro C-left 5 C-S-rght)
   ;; Ctrl+Shift+\
   edit-w C-S-yen
-  ;; Meta+V (クリップボード履歴。KDE Plasma では Klipper、niri では cliphist を fuzzel で選ぶ)
+  ;; Meta+V (clipboard history: pick from cliphist with fuzzel in niri)
   clip M-v
 )
 

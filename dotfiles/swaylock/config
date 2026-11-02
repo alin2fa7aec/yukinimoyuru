@@ -2,8 +2,8 @@
 # Colors are written as RRGGBB[AA]
 
 # The background is the same wallpaper as swaybg (swaybg in home/alin.nix). Monitors without an image are filled with color
-image=DP-1:~/Pictures/wallpaper/DP-1
-image=DP-2:~/Pictures/wallpaper/DP-2
+image=DP-1:~/.local/share/wallpaper/DP-1
+image=DP-2:~/.local/share/wallpaper/DP-2
 scaling=fill
 color=232831
 

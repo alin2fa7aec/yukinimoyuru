@@ -1,4 +1,4 @@
-{ pkgs, pkgs-unstable, inputs, lib, ... }:
+{ config, pkgs, pkgs-unstable, inputs, lib, ... }:
 let
   dot = ../dotfiles;
   nushellDir = builtins.path { path = dot + "/nushell"; name = "nushell-config"; };
@@ -76,6 +76,29 @@ in
     enable = true;
     enableBashIntegration = false;
   };
+
+  # ---- xdg user dirs ----
+  # Create only ~/downloads in the home directory.
+  # xdg-user-dirs-update fills in directories missing from user-dirs.dirs with defaults like ~/Pictures,
+  # so disable unused ones by setting them to $HOME (user-dirs.dirs(5)).
+  # home-manager は user-dirs.conf に enabled=False も書くので、Plasma のログイン時にも作り直されない
+  xdg.userDirs =
+    let
+      home = config.home.homeDirectory;
+    in
+    {
+      enable = true;
+      createDirectories = true;
+      download = "${home}/downloads";
+      desktop = home;
+      documents = home;
+      music = home;
+      pictures = home;
+      projects = home;
+      publicShare = home;
+      templates = home;
+      videos = home;
+    };
 
   # ---- input method ----
   # karukan's system dictionary. It is not bundled with the IME, so put the prebuilt release dictionary at the default path
@@ -238,7 +261,7 @@ in
     Install.WantedBy = [ "niri.service" ];
   };
 
-  # 壁紙はモニターごとに ~/Pictures/wallpaper/<出力名> を表示する。
+  # Each monitor shows ~/.local/share/wallpaper/<output name> as its wallpaper.
   # Images are not kept in the repository, so put the image you want at this path or symlink it,
   # then apply with systemctl --user restart swaybg
   systemd.user.services.swaybg = {
@@ -250,8 +273,8 @@ in
     Service = {
       ExecStart = lib.concatStringsSep " " [
         "${pkgs.swaybg}/bin/swaybg"
-        "-o DP-3 -i %h/Pictures/wallpaper/DP-3 -m fill"
-        "-o HDMI-A-1 -i %h/Pictures/wallpaper/HDMI-A-1 -m fill"
+        "-o DP-3 -i %h/.local/share/wallpaper/DP-3 -m fill"
+        "-o HDMI-A-1 -i %h/.local/share/wallpaper/HDMI-A-1 -m fill"
       ];
       Restart = "on-failure";
       RestartSec = 2;

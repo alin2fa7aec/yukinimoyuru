@@ -93,7 +93,7 @@ in
   home.packages =
     (with pkgs; [
       # CLI tools
-      ripgrep fd fzf eza bat unar delta jp jq
+      ripgrep fd fzf eza bat unar zip delta jp jq
       # clipboard=unnamed,unnamedplus in vimrc needs a +clipboard build (the system vim is -clipboard)
       vim-full
       # starship's custom.jj

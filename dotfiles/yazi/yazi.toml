@@ -61,6 +61,12 @@ extract = [
     { run = "ya pub extract --list %s", desc = "Extract here" },
 ]
 
+# For each selected item, create <name>.zip in the same place. It cds before compressing, so entries are stored as <name>/... rather than absolute paths.
+# If a zip with the same name exists, contents are added instead of overwriting it.
+archive = [
+    { run = 'for f in %s; do (cd "$(dirname "$f")" && zip -qr "$(basename "$f").zip" "$(basename "$f")"); done', desc = "Zip as <name>.zip" },
+]
+
 download = [
     { run = "ya emit download --open %S", desc = "Download and open" },
     { run = "ya emit download %S",        desc = "Download" },
@@ -68,7 +74,7 @@ download = [
 
 [open]
 rules = [
-    { url = "*/", use = [ "edit", "open", "reveal" ] },
+    { url = "*/", use = [ "edit", "open", "archive", "reveal" ] },
 
     { mime = "text/html", use = [ "browser", "open", "edit", "reveal" ] },
     { mime = "application/pdf", use = [ "browser", "open", "reveal" ] },

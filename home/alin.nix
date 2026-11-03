@@ -114,6 +114,8 @@ in
       pavucontrol networkmanagerapplet
       # PDF and image viewers. File operations are done in yazi
       zathura imv
+      # Cropping and annotating images (satty --filename <image>)
+      satty
     ])
     ++ [
       # Power menu (niri's Ctrl+Alt+Delete and the power box in waybar)

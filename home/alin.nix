@@ -414,7 +414,7 @@ in
     Install.WantedBy = [ "niri.service" ];
   };
 
-  # 5 分操作がなければモニタを消し、10 分でロックする。スリープの前と loginctl lock-session でもロックする。
+  # Turn off the monitors after 36 minutes of inactivity and lock at 49 minutes. Also lock before sleep and on loginctl lock-session.
   # While waybar's idle_inhibitor is on, niri does not report idleness, so neither happens.
   # Start swaylock only if it is not already running, so it is not started again while locked
   systemd.user.services.swayidle =
@@ -430,8 +430,8 @@ in
       Service = {
         ExecStart = lib.escapeShellArgs [
           "${pkgs.swayidle}/bin/swayidle" "-w"
-          "timeout" "300" "${pkgs.niri}/bin/niri msg action power-off-monitors"
-          "timeout" "600" lock
+          "timeout" "2160" "${pkgs.niri}/bin/niri msg action power-off-monitors"
+          "timeout" "2940" lock
           "before-sleep" lock
           "lock" lock
         ];

@@ -141,6 +141,9 @@
   # Nix core
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  # Keep ~/.nix-profile and ~/.nix-defexpr out of ~ and put them under ~/.local/state/nix.
+  # home-manager puts packages in /etc/profiles/per-user, so ~/.nix-profile was unused and kept being recreated as a dangling link
+  nix.settings.use-xdg-base-directories = true;
   nix.gc = {
     automatic = true;
     dates = "weekly";

@@ -9,6 +9,9 @@
 (defcfg
   ;; defsrc is empty and keys are mapped with deflayermap, so also process keys not in defsrc
   process-unmapped-keys yes
+  ;; Mouse buttons are remapped too, so grab mice as well as keyboards. Movement and the wheel pass through
+  ;; keyboard-mice only grabs mice built into keyboards; standalone mice need any
+  linux-device-detect-mode any
 )
 
 ;; ---- Codes for JIS-specific keys (evdev key codes: linux/input-event-codes.h) ----
@@ -89,6 +92,8 @@
   ;; Hankaku/Zenkaku (KEY_GRAVE on JIS), R Alt -> leader
   grv       @ldr
   ralt      @ldr
+  ;; Middle mouse click -> Alt+Left ("back" in browsers and the like)
+  mmid      A-left
 )
 
 ;; ============================================================

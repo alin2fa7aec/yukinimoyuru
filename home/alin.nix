@@ -401,6 +401,22 @@ in
     Install.WantedBy = [ "niri.service" ];
   };
 
+  # Wall clock at the top right of the QHD monitor. It shows the playing audio's spectrum around a circle, so it is drawn by its own program instead of waybar.
+  # The vertical bar reserves no space, so leave a right margin of its width (52px) to sit just left of the bar
+  systemd.user.services.clock-ring = {
+    Unit = {
+      Description = "wall clock with an audio spectrum ring";
+      PartOf = [ "niri.service" ];
+      After = [ "niri.service" "pipewire.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring --output DP-3 --margin-right 52 --theme ${dot + "/theme/nordfox.css"} --wires ${../pkgs/clock-ring/wires.json}";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "niri.service" ];
+  };
+
   # Leave notifications to swaync. Bound to niri.service like waybar
   systemd.user.services.swaync = {
     Unit = {

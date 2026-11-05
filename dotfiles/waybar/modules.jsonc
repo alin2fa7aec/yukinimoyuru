@@ -28,7 +28,7 @@
     "tooltip-format-deactivated": "Screen sleeps as usual"
   },
   "clock": {
-    // 時刻は QHD の壁時計 (config.jsonc の wallclock) に任せ、こちらはカレンダーの入り口として年と日付だけを出す
+    // The time is left to the QHD wall clock (pkgs/clock-ring); this shows only the year and date as an entry to the calendar
     "format": "{:%Y\n%m/%d}",
     // The system LC_TIME is ja_JP, so use en_US for the clock alone to get English weekday and month names in the calendar
     "locale": "en_US.UTF-8",

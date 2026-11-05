@@ -19,20 +19,9 @@
   min-height: 0;
 }
 
-/* バー自体は透明にして、箱と線だけを壁紙の上に浮かせる。
-   バーの上端から長い縦線を 2 本引き、箱の後ろを通して、下へ伸びながら消えていくようにする */
+/* Make the bar itself transparent so only the boxes and lines float over the wallpaper */
 window#waybar {
   background-color: transparent;
-  background-image:
-    linear-gradient(@wire, @wire-end),
-    linear-gradient(@wire, @wire-end);
-  background-repeat: no-repeat;
-  background-size:
-    1px 1000px,
-    1px 700px;
-  background-position:
-    26px 0,
-    72px 0;
   color: @fg1;
 }
 
@@ -45,13 +34,11 @@ tooltip label {
   color: @fg1;
 }
 
-/* モジュールは上から順に積み、どれもバーの幅 (88px) いっぱいの領域を持つ。
-   その中の好きな位置に箱を描き、箱をつなぐ折れ線や飾りの短い線も、自分の領域を通る部分を自分で描く。
+/* Modules stack from the top, each taking an area as wide as the bar (52px).
+   Each draws its box anywhere within that area, and draws the part of the wiring that passes through its own area.
    Boxes are drawn with background-image instead of border so lines can extend outside the box.
-   箱の左端を L、幅を S、上の余白を T、下の余白を B とすると、padding を T, 88 - L - S, B, L、min-height を S にして、文字を箱の中央に置く。
-   background-image の層は、箱の上下左右の辺 4 枚、線の数だけの枚数、箱の中 1 枚の順に重ねる。
-   線は 1 本の折れ線を縦と横の 1px の矩形に分けて描くので、モジュールごとの座標は手で書かず、
-   折れ線の点列から計算して書き出している。線の形を変えるときは、座標をまとめて計算し直す */
+   Box positions and wiring are defined in dotfiles/waybar/circuit/layout.mjs; build.mjs checks the wiring rules
+   and writes everything from "circuit: begin" to "circuit: end" in this file. Do not edit that part by hand */
 #custom-overview,
 #cpu,
 #memory,
@@ -70,12 +57,12 @@ tooltip label {
 #pulseaudio,
 #clock,
 #custom-notification {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 #custom-overview,
 #custom-power {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 #custom-overview:hover {
@@ -90,19 +77,17 @@ tooltip label {
    The tray's height changes with the number of icons, so its box cannot be drawn with background-image and uses border instead.
    In exchange, the tray has no top margin; the lines from the notifications run down to the bottom of their area and join the tray's top edge */
 #tray {
-  margin: 0 10px 8px 40px;
+  margin: 0 4px 6px 18px;
   padding: 6px 0;
   background-color: @glass;
   border: 1px solid @edge;
 }
 
-/* ワークスペースは一回り小さい 26px 四方の箱にする。
-   3 つ周期で左、右、中に置き、最後のワークスペースからは次のワークスペースではなく cpu へ線を引く。
-   状態ごとに色を変えられるよう、どの位置でも線を 5 本にそろえ、層の数を同じにしている。
+/* Workspaces are smaller 20px square boxes.
    Remove the shadows and gradients GTK buttons have */
 #workspaces button {
   margin: 0;
-  min-height: 26px;
+  min-height: 20px;
   color: @fg3;
   background-color: transparent;
   background-repeat: no-repeat;
@@ -110,9 +95,22 @@ tooltip label {
   text-shadow: none;
 }
 
+/* Workspace text color. The box border and fill colors per state are written by circuit */
+#workspaces button:hover,
+#workspaces button.active,
+#workspaces button.focused {
+  color: @fg1;
+}
+
+#workspaces button.urgent {
+  color: @red;
+}
+
+/* circuit: begin (written by dotfiles/waybar/circuit/build.mjs. Do not edit by hand) */
+
 #custom-overview {
-  padding: 22px 8px 8px 46px;
-  min-height: 34px;
+  padding: 18px 4px 8px 20px;
+  min-height: 28px;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
@@ -127,14 +125,17 @@ tooltip label {
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
     linear-gradient(@glass, @glass);
-  background-size: 34px 1px, 34px 1px, 1px 34px, 1px 34px, 46px 1px, 11px 1px, 1px 5px, 36px 1px, 1px 22px, 1px 22px, 1px 5px, 55px 1px, 1px 4px, 34px 34px;
-  background-position: 46px 22px, 46px 55px, 46px 22px, 79px 22px, 0px 40px, 0px 48px, 10px 48px, 10px 52px, 58px 0px, 62px 0px, 70px 56px, 16px 60px, 16px 60px, 46px 22px;
+  background-size: 28px 1px, 28px 1px, 1px 28px, 1px 28px, 1px 18px, 1px 18px, 12px 1px, 1px 20px, 8px 1px, 1px 4px, 4px 1px, 1px 4px, 20px 1px, 1px 13px, 4px 1px, 1px 23px, 28px 28px;
+  background-position: 20px 18px, 20px 45px, 20px 18px, 47px 18px, 30px 0px, 38px 0px, 8px 24px, 8px 4px, 0px 4px, 24px 46px, 20px 49px, 20px 50px, 0px 40px, 0px 41px, 48px 30px, 51px 31px, 20px 18px;
 }
 
 #cpu {
-  padding: 10px 42px 8px 8px;
-  min-height: 38px;
+  padding: 6px 18px 6px 4px;
+  min-height: 30px;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
@@ -145,14 +146,35 @@ tooltip label {
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
     linear-gradient(@glass, @glass);
-  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 10px, 39px 1px, 1px 38px, 5px 1px, 1px 26px, 38px 38px;
-  background-position: 8px 10px, 8px 47px, 8px 10px, 45px 10px, 30px 0px, 46px 18px, 84px 18px, 3px 30px, 3px 30px, 8px 10px;
+  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 6px, 1px 15px, 3px 1px, 1px 42px, 7px 1px, 1px 21px, 1px 6px, 30px 30px;
+  background-position: 4px 6px, 4px 35px, 4px 6px, 33px 6px, 20px 0px, 0px 0px, 1px 14px, 51px 0px, 34px 20px, 40px 21px, 10px 36px, 4px 6px;
 }
 
 #memory {
-  padding: 0px 20px 14px 30px;
-  min-height: 38px;
+  padding: 4px 8px 8px 14px;
+  min-height: 30px;
+  background-image:
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@edge, @edge),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@glass, @glass);
+  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 4px, 1px 19px, 7px 1px, 1px 42px, 1px 8px, 1px 8px, 30px 30px;
+  background-position: 14px 4px, 14px 33px, 14px 4px, 43px 4px, 40px 0px, 51px 0px, 44px 18px, 10px 0px, 18px 34px, 38px 34px, 14px 4px;
+}
+
+#idle_inhibitor {
+  padding: 6px 22px 6px 6px;
+  min-height: 24px;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
@@ -167,12 +189,12 @@ tooltip label {
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
     linear-gradient(@glass, @glass);
-  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 23px, 17px 1px, 1px 45px, 34px 1px, 1px 7px, 1px 14px, 7px 1px, 1px 22px, 38px 38px;
-  background-position: 30px 0px, 30px 37px, 30px 0px, 67px 0px, 84px 0px, 68px 22px, 3px 0px, 3px 44px, 36px 38px, 44px 38px, 68px 30px, 74px 30px, 30px 0px;
+  background-size: 24px 1px, 24px 1px, 1px 24px, 1px 24px, 1px 6px, 1px 6px, 1px 36px, 5px 1px, 1px 17px, 1px 6px, 6px 1px, 1px 15px, 24px 24px;
+  background-position: 6px 6px, 6px 29px, 6px 6px, 29px 6px, 10px 0px, 18px 0px, 38px 0px, 30px 18px, 34px 19px, 10px 30px, 0px 20px, 0px 21px, 6px 6px;
 }
 
-#idle_inhibitor {
-  padding: 12px 8px 10px 50px;
+#pulseaudio {
+  padding: 6px 4px 6px 18px;
   min-height: 30px;
   background-image:
     linear-gradient(@edge, @edge),
@@ -188,32 +210,13 @@ tooltip label {
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
     linear-gradient(@glass, @glass);
-  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 21px, 6px 1px, 1px 12px, 1px 7px, 35px 1px, 1px 4px, 7px 1px, 1px 24px, 30px 30px;
-  background-position: 50px 12px, 50px 41px, 50px 12px, 79px 12px, 44px 0px, 44px 20px, 74px 0px, 64px 42px, 30px 48px, 30px 48px, 80px 28px, 86px 28px, 50px 12px;
-}
-
-#pulseaudio {
-  padding: 14px 38px 8px 12px;
-  min-height: 38px;
-  background-image:
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@glass, @glass);
-  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 14px, 1px 34px, 37px 1px, 1px 8px, 11px 1px, 1px 22px, 38px 38px;
-  background-position: 12px 14px, 12px 51px, 12px 14px, 49px 14px, 30px 0px, 86px 0px, 50px 33px, 20px 52px, 50px 38px, 60px 38px, 12px 14px;
+  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 6px, 1px 6px, 1px 42px, 1px 42px, 4px 1px, 1px 21px, 4px 1px, 1px 21px, 30px 30px;
+  background-position: 18px 6px, 18px 35px, 18px 6px, 47px 6px, 34px 0px, 38px 0px, 0px 0px, 10px 0px, 14px 20px, 14px 21px, 48px 20px, 51px 21px, 18px 6px;
 }
 
 #clock {
-  padding: 12px 8px 14px 34px;
-  min-height: 46px;
+  padding: 6px 12px 8px 4px;
+  min-height: 36px;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
@@ -225,17 +228,15 @@ tooltip label {
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
     linear-gradient(@glass, @glass);
-  background-size: 46px 1px, 46px 1px, 1px 46px, 1px 46px, 1px 39px, 14px 1px, 1px 12px, 1px 14px, 5px 1px, 1px 34px, 46px 46px;
-  background-position: 34px 12px, 34px 57px, 34px 12px, 79px 12px, 20px 0px, 20px 38px, 60px 0px, 56px 58px, 80px 38px, 84px 38px, 34px 12px;
+  background-size: 36px 1px, 36px 1px, 1px 36px, 1px 36px, 1px 6px, 1px 6px, 1px 50px, 1px 50px, 1px 8px, 5px 1px, 1px 29px, 36px 36px;
+  background-position: 4px 6px, 4px 41px, 4px 6px, 39px 6px, 10px 0px, 14px 0px, 0px 0px, 51px 0px, 14px 42px, 40px 20px, 44px 21px, 4px 6px;
 }
 
-/* 通知の箱は時計の下、左寄りに置き、時計から下りてくる 2 本の線を受ける。
-   x=56 の線は箱の右辺へ曲げ、x=84 の線はそのまま下へ通す。
-   4K のバーでは通知が最後なので、箱の下と x=84 の線を伸ばしながら消していく */
 #custom-notification {
-  padding: 12px 38px 14px 12px;
-  min-height: 38px;
+  padding: 6px 16px 8px 6px;
+  min-height: 30px;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
@@ -243,16 +244,18 @@ tooltip label {
     linear-gradient(@edge, @edge),
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire-end),
     linear-gradient(@wire, @wire-end),
     linear-gradient(@wire, @wire-end),
     linear-gradient(@glass, @glass);
-  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 31px, 6px 1px, 1px 64px, 1px 14px, 38px 38px;
-  background-position: 12px 12px, 12px 49px, 12px 12px, 49px 12px, 56px 0px, 50px 30px, 84px 0px, 30px 50px, 12px 12px;
+  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 6px, 1px 21px, 5px 1px, 1px 44px, 1px 44px, 1px 8px, 30px 30px;
+  background-position: 6px 6px, 6px 35px, 6px 6px, 35px 6px, 14px 0px, 0px 0px, 1px 20px, 44px 0px, 51px 0px, 22px 36px, 6px 6px;
 }
 
-/* QHD のバーでは通知の下に tray が続くので、線を消さずに tray の上辺 (x=40 から 78) へ下ろす。
-   箱の下からの線は x=56 へ、x=84 の線は x=72 へ寄せる */
 window#waybar.right #custom-notification {
+  padding: 6px 16px 8px 6px;
+  min-height: 30px;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
@@ -262,74 +265,66 @@ window#waybar.right #custom-notification {
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
+    linear-gradient(@wire, @wire-end),
     linear-gradient(@wire, @wire),
     linear-gradient(@glass, @glass);
-  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 31px, 6px 1px, 1px 59px, 13px 1px, 1px 6px, 1px 6px, 27px 1px, 1px 8px, 38px 38px;
-  background-position: 12px 12px, 12px 49px, 12px 12px, 49px 12px, 56px 0px, 50px 30px, 84px 0px, 72px 58px, 72px 58px, 30px 50px, 30px 56px, 56px 56px, 12px 12px;
+  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 6px, 1px 21px, 5px 1px, 1px 44px, 1px 44px, 1px 8px, 30px 30px;
+  background-position: 6px 6px, 6px 35px, 6px 6px, 35px 6px, 14px 0px, 0px 0px, 1px 20px, 44px 0px, 51px 0px, 22px 36px, 6px 6px;
 }
 
-/* 電源の箱はバーの下端に、ほかの箱から離して置く。
-   上の箱とはつながないので、箱から上へ伸びる 2 本の線は上に行くほど消えていくようにし、
-   左の線と箱の下からの線は画面の下端まで下ろす */
 #custom-power {
-  padding: 60px 10px 16px 40px;
-  min-height: 38px;
+  padding: 56px 4px 14px 18px;
+  min-height: 30px;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
     linear-gradient(@wire-end, @wire),
+    linear-gradient(@wire, @wire),
     linear-gradient(@wire-end, @wire),
     linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
     linear-gradient(@glass, @glass);
-  background-size: 38px 1px, 38px 1px, 1px 38px, 1px 38px, 1px 60px, 1px 84px, 20px 1px, 1px 16px, 38px 38px;
-  background-position: 40px 60px, 40px 97px, 40px 60px, 77px 60px, 58px 0px, 20px 30px, 20px 80px, 70px 98px, 40px 60px;
+  background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px, 1px 56px, 10px 1px, 1px 50px, 1px 14px, 30px 30px;
+  background-position: 18px 56px, 18px 85px, 18px 56px, 47px 56px, 36px 0px, 8px 70px, 8px 20px, 28px 86px, 18px 56px;
 }
 
 #workspaces button:nth-child(3n+1) {
-  padding: 7px 54px 5px 8px;
-  min-height: 26px;
-  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 7px, 1px 3px, 45px 1px, 1px 3px, 8px 1px, 26px 26px;
-  background-position: 8px 7px, 8px 32px, 8px 7px, 33px 7px, 16px 0px, 28px 33px, 28px 35px, 72px 35px, 0px 20px, 8px 7px;
+  padding: 4px 28px 4px 4px;
+  min-height: 20px;
+  background-size: 20px 1px, 20px 1px, 1px 20px, 1px 20px, 1px 28px, 1px 28px, 1px 4px, 9px 1px, 1px 13px, 20px 20px;
+  background-position: 4px 4px, 4px 23px, 4px 4px, 23px 4px, 0px 0px, 51px 0px, 20px 0px, 24px 14px, 32px 15px, 4px 4px;
 }
 
 #workspaces button:nth-child(3n+1):last-child {
-  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 7px, 1px 3px, 3px 1px, 1px 3px, 8px 1px, 26px 26px;
-  background-position: 8px 7px, 8px 32px, 8px 7px, 33px 7px, 16px 0px, 28px 33px, 28px 35px, 30px 35px, 0px 20px, 8px 7px;
+  padding: 4px 28px 4px 4px;
+  min-height: 20px;
+  background-size: 20px 1px, 20px 1px, 1px 20px, 1px 20px, 1px 28px, 1px 28px, 1px 4px, 1px 4px, 1px 1px, 20px 20px;
+  background-position: 4px 4px, 4px 23px, 4px 4px, 23px 4px, 0px 0px, 51px 0px, 20px 0px, 20px 24px, -5px -5px, 4px 4px;
 }
 
 #workspaces button:nth-child(3n+2) {
-  padding: 4px 8px 8px 54px;
-  min-height: 26px;
-  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 4px, 1px 5px, 15px 1px, 1px 4px, 8px 1px, 26px 26px;
-  background-position: 54px 4px, 54px 29px, 54px 4px, 79px 4px, 72px 0px, 60px 30px, 46px 34px, 46px 34px, 80px 12px, 54px 4px;
+  padding: 4px 4px 4px 28px;
+  min-height: 20px;
+  background-size: 20px 1px, 20px 1px, 1px 20px, 1px 20px, 1px 28px, 1px 28px, 1px 4px, 1px 4px, 1px 1px, 20px 20px;
+  background-position: 28px 4px, 28px 23px, 28px 4px, 47px 4px, 0px 0px, 51px 0px, 32px 0px, 32px 24px, -5px -5px, 28px 4px;
 }
 
 #workspaces button:nth-child(3n+2):last-child {
-  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 4px, 1px 5px, 31px 1px, 1px 4px, 8px 1px, 26px 26px;
-  background-position: 54px 4px, 54px 29px, 54px 4px, 79px 4px, 72px 0px, 60px 30px, 30px 34px, 30px 34px, 80px 12px, 54px 4px;
+  padding: 4px 4px 4px 28px;
+  min-height: 20px;
+  background-size: 20px 1px, 20px 1px, 1px 20px, 1px 20px, 1px 28px, 1px 28px, 1px 4px, 8px 1px, 1px 13px, 20px 20px;
+  background-position: 28px 4px, 28px 23px, 28px 4px, 47px 4px, 0px 0px, 51px 0px, 32px 0px, 20px 14px, 20px 15px, 28px 4px;
 }
 
 #workspaces button:nth-child(3n) {
-  padding: 6px 34px 6px 28px;
-  min-height: 26px;
-  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 6px, 1px 4px, 19px 1px, 1px 3px, 1px 3px, 26px 26px;
-  background-position: 28px 6px, 28px 31px, 28px 6px, 53px 6px, 46px 0px, 34px 32px, 16px 35px, 16px 35px, 16px 35px, 28px 6px;
+  padding: 4px 16px 4px 16px;
+  min-height: 20px;
+  background-size: 20px 1px, 20px 1px, 1px 20px, 1px 20px, 1px 28px, 1px 28px, 1px 4px, 1px 4px, 1px 1px, 20px 20px;
+  background-position: 16px 4px, 16px 23px, 16px 4px, 35px 4px, 0px 0px, 51px 0px, 32px 0px, 20px 24px, -5px -5px, 16px 4px;
 }
 
-#workspaces button:nth-child(3n):last-child {
-  background-size: 26px 1px, 26px 1px, 1px 26px, 1px 26px, 1px 6px, 1px 4px, 5px 1px, 1px 3px, 1px 3px, 26px 26px;
-  background-position: 28px 6px, 28px 31px, 28px 6px, 53px 6px, 46px 0px, 34px 32px, 30px 35px, 30px 35px, 30px 35px, 28px 6px;
-}
-
-/* ワークスペースの状態ごとに、箱の縁と中の色を変える。線の色は変えない */
 #workspaces button {
-  color: @fg3;
   background-image:
     linear-gradient(@wire, @wire),
     linear-gradient(@wire, @wire),
@@ -344,7 +339,6 @@ window#waybar.right #custom-notification {
 }
 
 #workspaces button:hover {
-  color: @fg1;
   background-image:
     linear-gradient(@edge, @edge),
     linear-gradient(@edge, @edge),
@@ -358,9 +352,7 @@ window#waybar.right #custom-notification {
     linear-gradient(alpha(@bg1, 0.45), alpha(@bg1, 0.45));
 }
 
-/* そのモニタで表示中のワークスペース */
 #workspaces button.active {
-  color: @fg1;
   background-image:
     linear-gradient(@edge-hi, @edge-hi),
     linear-gradient(@edge-hi, @edge-hi),
@@ -374,9 +366,7 @@ window#waybar.right #custom-notification {
     linear-gradient(@glass, @glass);
 }
 
-/* フォーカスのあるモニタで表示中のワークスペース */
 #workspaces button.focused {
-  color: @fg1;
   background-image:
     linear-gradient(@blue, @blue),
     linear-gradient(@blue, @blue),
@@ -391,7 +381,6 @@ window#waybar.right #custom-notification {
 }
 
 #workspaces button.urgent {
-  color: @red;
   background-image:
     linear-gradient(@red, @red),
     linear-gradient(@red, @red),
@@ -405,62 +394,7 @@ window#waybar.right #custom-notification {
     linear-gradient(@glass, @glass);
 }
 
-/* 壁時計 (config.jsonc の wallclock)。縦のバーの線は引かず、時計の箱と線だけを見せる */
-window#waybar.wallclock {
-  background-image: none;
-}
-
-/* clock#wall は上の #clock にも当たるので、箱の設定を上書きする。
-   左から 30px、上から 36px の位置に 100px 四方の箱を描き、その後ろの右上と左下に、小さい四角形を 1 つずつ重ねる。
-   後ろの四角形は、時計の箱に隠れる部分の縁を描かない。中は重なった部分だけ濃くなる。
-   そのまわりの余白に、箱から伸びる線を描く。右の余白はバーの左端まで続くので、そこへ線を 2 本引き、バーの overview の左辺へつなぐ。
-   上の線は画面の上端まで、下の線は長く伸ばして消えていくようにする */
-#clock.wall {
-  margin: 0;
-  border: none;
-  background-color: transparent;
-  background-repeat: no-repeat;
-  font-size: 28px;
-  letter-spacing: 2px;
-  color: @fg1;
-  text-shadow: 0 1px 3px alpha(#000000, 0.6);
-  padding: 36px 60px 100px 30px;
-  min-height: 100px;
-  min-width: 100px;
-  background-image:
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire-end),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire),
-    linear-gradient(@wire, @wire-end),
-    linear-gradient(@wire, @wire-end),
-    linear-gradient(@glass, @glass),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@edge, @edge),
-    linear-gradient(@glass, @glass),
-    linear-gradient(@glass, @glass);
-  background-size: 100px 1px, 100px 1px, 1px 100px, 1px 100px, 1px 36px, 1px 14px, 13px 1px, 1px 23px, 1px 14px, 22px 1px, 49px 1px, 1px 53px, 12px 1px, 30px 1px, 1px 80px, 1px 25px, 15px 1px, 1px 66px, 1px 55px, 100px 100px, 56px 1px, 38px 1px, 1px 22px, 1px 56px, 18px 1px, 40px 1px, 1px 40px, 1px 20px, 56px 56px, 40px 40px;
-  background-position: 30px 36px, 30px 135px, 30px 36px, 129px 36px, 48px 0px, 64px 22px, 64px 22px, 76px 0px, 150px 0px, 168px 40px, 130px 100px, 178px 48px, 178px 48px, 0px 90px, 24px 156px, 70px 136px, 70px 160px, 84px 160px, 110px 136px, 30px 36px, 112px 14px, 130px 69px, 112px 14px, 167px 14px, 12px 116px, 12px 155px, 12px 116px, 51px 136px, 112px 14px, 12px 116px;
-}
+/* circuit: end */
 
 #idle_inhibitor.deactivated {
   color: @fg3;

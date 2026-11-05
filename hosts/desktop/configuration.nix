@@ -120,6 +120,12 @@
       configFile = ../../kanata/kanata-linux.kbd;
     };
   };
+  # kanata sometimes misses the Bluetooth keyboard because it cannot grab it yet when rescanning right after it connects.
+  # Restart kanata when it connects so it rescans for devices.
+  # Matching devices that create several event nodes would restart it repeatedly and hit StartLimitBurst, so narrow it to one by name.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_KEYBOARD}=="1", ATTRS{name}=="keyboard", RUN+="${pkgs.systemd}/bin/systemctl --no-block try-restart kanata-main.service"
+  '';
 
   # Claude Code managed settings (apply to all users and take precedence over user settings)
   environment.etc."claude-code/managed-settings.json".source = ../../dotfiles/claude/managed-settings.json;

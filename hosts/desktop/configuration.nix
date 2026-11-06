@@ -43,7 +43,8 @@
       "niri-session"
     ];
   };
-  # Where home-manager's dconf.settings (GTK dark mode) writes. The Plasma module used to enable this
+  # home-manager's dconf.settings (GTK dark mode) needs the dconf database and service.
+  # Desktop environments such as GNOME and Plasma turn this on themselves, but the niri module does not
   programs.dconf.enable = true;
   # The app xdg-open uses for directories. Otherwise zathura-cb (a comic book plugin), which claims to handle directories, gets picked.
   # Zen Browser rewrites ~/.config/mimeapps.list, so write to /etc/xdg/mimeapps.list

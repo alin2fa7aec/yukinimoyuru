@@ -197,7 +197,7 @@ in
     };
 
   # ---- fonts ----
-  # Carry over the values chosen in Plasma's font settings
+  # Font rendering for this machine's monitors. subpixelRendering must match the panel's subpixel layout, so revisit it on other hardware
   fonts.fontconfig = {
     antialiasing = true;
     hinting = "slight";

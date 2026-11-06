@@ -1,11 +1,19 @@
-{ config, pkgs, pkgs-unstable, inputs, lib, ... }:
+{
+  config,
+  pkgs,
+  pkgs-unstable,
+  inputs,
+  lib,
+  ...
+}:
 let
   # The dotfiles are used in two ways:
   # - dot: the copy pinned by flake.lock, for files nix reads or transforms (readFile, generated colors, service arguments)
   # - liveDot: a link straight into the checkout, for files placed as they are. Edits take effect without a rebuild
   # Assumes the checkout lives at ~/!metier/dotfiles
   dot = inputs.dotfiles;
-  liveDot = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/dotfiles/${path}";
+  liveDot =
+    path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/dotfiles/${path}";
   nushellDir = "${dot}/nushell";
   # Identity shared by git and jj. The address is GitHub's noreply one, so it is safe to publish
   user = {
@@ -108,27 +116,52 @@ in
   home.packages =
     (with pkgs; [
       # CLI tools
-      ripgrep fd fzf eza bat unar zip delta jp jq
+      ripgrep
+      fd
+      fzf
+      eza
+      bat
+      unar
+      zip
+      delta
+      jp
+      jq
       # clipboard=unnamed,unnamedplus in vimrc needs a +clipboard build (the system vim is -clipboard)
       vim-full
       # starship's custom.jj
       jj-starship
       # yazi openers (Show media info / Show EXIF)
-      mediainfo exiftool
+      mediainfo
+      exiftool
       # develop
-      rustup gcc pkg-config gnumake cargo-binstall nodejs bun
+      rustup
+      gcc
+      pkg-config
+      gnumake
+      cargo-binstall
+      nodejs
+      bun
       # Claude Code's clangd-lsp plugin
       clang-tools
       # For the niri session. niri uses xwayland-satellite for X11 apps if it is on PATH
-      fuzzel waybar swaynotificationcenter xwayland-satellite swaybg
+      fuzzel
+      waybar
+      swaynotificationcenter
+      xwayland-satellite
+      swaybg
       # Screen lock (swaylock is used from niri's Super+Alt+L and swayidle), media keys
-      swaylock swayidle playerctl
+      swaylock
+      swayidle
+      playerctl
       # Clipboard history (niri's Mod+V)
-      cliphist wl-clipboard
+      cliphist
+      wl-clipboard
       # Volume settings (right-click the volume box in waybar), network settings (nm-applet and nm-connection-editor)
-      pavucontrol networkmanagerapplet
+      pavucontrol
+      networkmanagerapplet
       # PDF and image viewers. File operations are done in yazi
-      zathura imv
+      zathura
+      imv
       # Cropping and annotating images (satty --filename <image>)
       satty
     ])
@@ -217,8 +250,14 @@ in
   # GTK overrides libadwaita's named colors on top of adw-gtk3 dark; Qt passes the nordfox palette to qt6ct's Fusion
   gtk = {
     enable = true;
-    theme = { name = "adw-gtk3-dark"; package = pkgs.adw-gtk3; };
-    iconTheme = { name = "Papirus-Dark"; package = pkgs.papirus-icon-theme; };
+    theme = {
+      name = "adw-gtk3-dark";
+      package = pkgs.adw-gtk3;
+    };
+    iconTheme = {
+      name = "Papirus-Dark";
+      package = pkgs.papirus-icon-theme;
+    };
     gtk3.extraCss = builtins.readFile (dot + "/theme/gtk.css");
     gtk4.extraCss = builtins.readFile (dot + "/theme/gtk.css");
   };
@@ -246,11 +285,13 @@ in
 
   # ---- input method ----
   # karukan's system dictionary. It is not bundled with the IME, so put the prebuilt release dictionary at the default path
-  home.file.".local/share/karukan-im/dict.bin".source = "${pkgs.fetchzip {
-    url = "https://github.com/togatoga/karukan/releases/download/v0.1.0/dict.tgz";
-    hash = "sha256-gWUZH3FQfuksslb/AqUvBU0OVFe9DMg0+8SpGHlASqA=";
-    stripRoot = false;
-  }}/dict.bin";
+  home.file.".local/share/karukan-im/dict.bin".source = "${
+    pkgs.fetchzip {
+      url = "https://github.com/togatoga/karukan/releases/download/v0.1.0/dict.tgz";
+      hash = "sha256-gWUZH3FQfuksslb/AqUvBU0OVFe9DMg0+8SpGHlASqA=";
+      stripRoot = false;
+    }
+  }/dict.bin";
   # karukan only reads its config file and never writes it, so a link is fine
   xdg.configFile."karukan-im/config.toml".source = liveDot "karukan/config.toml";
 
@@ -261,7 +302,12 @@ in
     let
       themeDir = "fcitx5/themes/nordfox";
       defaultDark = "${pkgs.fcitx5}/share/fcitx5/themes/default-dark";
-      margin = n: { Left = n; Right = n; Top = n; Bottom = n; };
+      margin = n: {
+        Left = n;
+        Right = n;
+        Top = n;
+        Bottom = n;
+      };
     in
     {
       "${themeDir}/theme.conf".text = lib.generators.toINI { } {
@@ -313,9 +359,13 @@ in
         "Menu/TextMargin" = margin 5;
       };
     }
-    // lib.listToAttrs (map
-      (f: lib.nameValuePair "${themeDir}/${f}" { source = "${defaultDark}/${f}"; })
-      [ "prev.png" "next.png" "radio.png" "arrow.png" ]
+    // lib.listToAttrs (
+      map (f: lib.nameValuePair "${themeDir}/${f}" { source = "${defaultDark}/${f}"; }) [
+        "prev.png"
+        "next.png"
+        "radio.png"
+        "arrow.png"
+      ]
     );
 
   # ---- tools ----

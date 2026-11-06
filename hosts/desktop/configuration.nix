@@ -1,4 +1,11 @@
-{ config, lib, pkgs, pkgs-unstable, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-unstable,
+  inputs,
+  ...
+}:
 {
   imports = [ ./hardware-configuration.nix ];
 
@@ -9,9 +16,18 @@
   boot.kernelPackages = pkgs.linuxPackages;
 
   # file system
-  fileSystems."/".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/home".options = [ "compress=zstd" "noatime" ];
-  fileSystems."/nix".options = [ "compress=zstd" "noatime" ];
+  fileSystems."/".options = [
+    "compress=zstd"
+    "noatime"
+  ];
+  fileSystems."/home".options = [
+    "compress=zstd"
+    "noatime"
+  ];
+  fileSystems."/nix".options = [
+    "compress=zstd"
+    "noatime"
+  ];
   zramSwap.enable = true;
 
   # network/time/locale
@@ -77,7 +93,10 @@
     # For waybar icons (a Nerd Font containing only icons)
     nerd-fonts.symbols-only
   ];
-  fonts.fontconfig.defaultFonts.monospace = [ "Moralerspace Argon HW" "Noto Sans Mono CJK JP" ];
+  fonts.fontconfig.defaultFonts.monospace = [
+    "Moralerspace Argon HW"
+    "Noto Sans Mono CJK JP"
+  ];
 
   # audio
   services.pulseaudio.enable = false;
@@ -92,13 +111,13 @@
   # GPU
   hardware.graphics = {
     enable = true;
-    enable32Bit = true;   # For 32-bit games on Steam/Proton
+    enable32Bit = true; # For 32-bit games on Steam/Proton
   };
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
-    open = true;                    # Must be set explicitly
+    open = true; # Must be set explicitly
     modesetting.enable = true;
-    powerManagement.enable = true;  # Avoids display corruption after resuming from sleep
+    powerManagement.enable = true; # Avoids display corruption after resuming from sleep
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
@@ -106,7 +125,7 @@
   # Bluetooth
   hardware.bluetooth = {
     enable = true;
-    powerOnBoot = true;   # Power on the adapter at boot
+    powerOnBoot = true; # Power on the adapter at boot
   };
 
   # Game
@@ -130,7 +149,8 @@
   '';
 
   # Claude Code managed settings (apply to all users and take precedence over user settings)
-  environment.etc."claude-code/managed-settings.json".source = "${inputs.dotfiles}/claude/managed-settings.json";
+  environment.etc."claude-code/managed-settings.json".source =
+    "${inputs.dotfiles}/claude/managed-settings.json";
 
   # devenv
   programs.nix-ld.enable = true;
@@ -142,7 +162,11 @@
   # user
   users.users.alin = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "docker" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "docker"
+    ];
   };
 
   # sudo -A asks for the password in a fuzzel prompt instead of the terminal.
@@ -156,7 +180,10 @@
 
   # Nix core
   nixpkgs.config.allowUnfree = true;
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   # Keep ~/.nix-profile and ~/.nix-defexpr out of ~ and put them under ~/.local/state/nix.
   # home-manager puts packages in /etc/profiles/per-user, so ~/.nix-profile was unused and kept being recreated as a dangling link
   nix.settings.use-xdg-base-directories = true;
@@ -168,14 +195,16 @@
   nix.optimise.automatic = true;
 
   environment.systemPackages = with pkgs; [
-    git curl wget
+    git
+    curl
+    wget
   ];
 
   # editor: standardize on vim and leave out NixOS's default nano
   programs.nano.enable = false;
   programs.vim = {
     enable = true;
-    defaultEditor = true;  # EDITOR=vim
+    defaultEditor = true; # EDITOR=vim
   };
   environment.variables.VISUAL = "vim";
 

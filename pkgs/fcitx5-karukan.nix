@@ -56,7 +56,10 @@ stdenv.mkDerivation (finalAttrs: {
   meta = {
     description = "Japanese input method with neural kana-kanji conversion for fcitx5";
     homepage = "https://github.com/togatoga/karukan";
-    license = with lib.licenses; [ mit asl20 ];
+    license = with lib.licenses; [
+      mit
+      asl20
+    ];
     platforms = lib.platforms.linux;
   };
 })

@@ -23,14 +23,21 @@
     };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, ... }@inputs:
+  outputs =
+    {
+      nixpkgs,
+      nixpkgs-unstable,
+      home-manager,
+      ...
+    }@inputs:
     let
       system = "x86_64-linux";
       pkgs-unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
       };
-    in {
+    in
+    {
       # `nix fmt` formats every tracked .nix file with nixfmt.
       # hardware-configuration.nix is left as nixos-generate-config wrote it
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree.override {

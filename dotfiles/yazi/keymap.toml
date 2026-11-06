@@ -1,9 +1,0 @@
-[[mgr.prepend_keymap]]
-on = [ "d", "d" ]
-run = "remove"
-desc = "trash to enter 'd'"
-
-[[mgr.prepend_keymap]]
-on = "f"
-run = "plugin jump-to-char"
-desc = "Jump to char"

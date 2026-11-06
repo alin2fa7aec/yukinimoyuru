@@ -1,9 +1,9 @@
 { config, pkgs, pkgs-unstable, inputs, lib, ... }:
 let
-  dot = ../dotfiles;
-  # Link into the checkout itself instead of the store, for files edited often. Assumes the repository lives at this path
-  liveDot = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/yukinimoyuru/dotfiles/${path}";
-  nushellDir = builtins.path { path = dot + "/nushell"; name = "nushell-config"; };
+  dot = inputs.dotfiles;
+  # Link into the dotfiles checkout instead of the store, for files edited often. Assumes the checkout lives at this path
+  liveDot = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/dotfiles/${path}";
+  nushellDir = "${dot}/nushell";
   # Turn "@define-color name #rrggbb;" lines in nordfox.css into { name = "#rrggbb"; }. Used for the fcitx5 theme, which cannot read CSS
   nordfox = lib.listToAttrs (
     map (m: lib.nameValuePair (lib.elemAt m 0) (lib.elemAt m 1)) (
@@ -200,7 +200,7 @@ in
   };
 
   # ---- look ----
-  # Theme GTK and Qt apps with nordfox. Colors come from dotfiles/theme/nordfox.css.
+  # Theme GTK and Qt apps with nordfox. Colors come from theme/nordfox.css in the dotfiles repository.
   # GTK overrides libadwaita's named colors on top of adw-gtk3 dark; Qt passes the nordfox palette to qt6ct's Fusion
   gtk = {
     enable = true;

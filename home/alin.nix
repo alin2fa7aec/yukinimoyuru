@@ -1,6 +1,8 @@
 { config, pkgs, pkgs-unstable, inputs, lib, ... }:
 let
   dot = ../dotfiles;
+  # Link into the checkout itself instead of the store, for files edited often. Assumes the repository lives at this path
+  liveDot = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/yukinimoyuru/dotfiles/${path}";
   nushellDir = builtins.path { path = dot + "/nushell"; name = "nushell-config"; };
   # Turn "@define-color name #rrggbb;" lines in nordfox.css into { name = "#rrggbb"; }. Used for the fcitx5 theme, which cannot read CSS
   nordfox = lib.listToAttrs (
@@ -517,11 +519,14 @@ in
 
   # ---- Claude Code ----
   # managed-settings.json is placed in /etc/claude-code on the system side (hosts/desktop/configuration.nix)
-  # The writing-style skill is registered on claude.ai and synced from there; only its lint is deployed here
-  home.file.".claude/skills/commit-message".source = dot + "/claude/skills/commit-message";
+  # The writing-style skill is registered on claude.ai and synced from there; only its lint is deployed here.
+  # The lint runs from the PostToolUse hook, so it stays in the store and changes only on a rebuild
   home.file.".claude/writing-lint.nu".source = dot + "/claude/writing-lint.nu";
-  home.file.".claude/keybindings.json".source = dot + "/claude/keybindings.json";
-  home.file.".claude/CLAUDE.md".source = dot + "/claude/CLAUDE.md";
+  # Instructions, skills and keybindings are tuned often, so link them straight to the checkout:
+  # edits take effect without a rebuild, and /keybindings can write back into the repository
+  home.file.".claude/CLAUDE.md".source = liveDot "claude/CLAUDE.md";
+  home.file.".claude/skills/commit-message".source = liveDot "claude/skills/commit-message";
+  home.file.".claude/keybindings.json".source = liveDot "claude/keybindings.json";
 
   # Claude Code itself rewrites settings.json (/model, /config, etc.),
   # so instead of a link to the store, put a writable copy only when it is missing

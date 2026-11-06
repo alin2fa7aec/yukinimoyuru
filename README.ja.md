@@ -24,6 +24,8 @@
 
 ## 使い方
 
+[dotfiles](https://github.com/alin2fa7aec/dotfiles) を `~/!metier/dotfiles` にチェックアウトしてあることを前提にしている。niri や waybar の設定のようにそのまま配置するファイルは、Nix store ではなくこのチェックアウトへリンクするので、チェックアウトが無いとその多くがリンク切れになる。nix が読んだり変換したりするファイルは `flake.lock` で固定したコピーから取るので、チェックアウトが無くても動く。
+
 ```sh
 sudo nixos-rebuild switch --flake .#yukiwari
 ```

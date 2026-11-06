@@ -24,6 +24,8 @@ NixOS configuration for my desktop PC (hostname `yukiwari`). The system and the 
 
 ## Usage
 
+The configuration expects a checkout of [dotfiles](https://github.com/alin2fa7aec/dotfiles) at `~/!metier/dotfiles`. Files placed as they are, such as the niri and waybar configs, link into that checkout instead of the Nix store, so without it most of them end up as dangling links. Files that nix reads or transforms come from the copy pinned in `flake.lock` and work either way.
+
 ```sh
 sudo nixos-rebuild switch --flake .#yukiwari
 ```

@@ -416,7 +416,7 @@ in
       After = [ "niri.service" "pipewire.service" ];
     };
     Service = {
-      ExecStart = "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring --output DP-3 --margin-right 52 --theme ${dot + "/theme/nordfox.css"} --wires ${../pkgs/clock-ring/wires.json}";
+      ExecStart = "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring --output DP-3 --margin-right 52 --theme ${dot + "/theme/nordfox.css"} --wires ${dot + "/waybar/circuit/wires.json"}";
       Restart = "on-failure";
       RestartSec = 2;
     };
@@ -530,6 +530,7 @@ in
   home.file.".claude/CLAUDE.md".source = liveDot "claude/CLAUDE.md";
   home.file.".claude/skills/commit-message".source = liveDot "claude/skills/commit-message";
   home.file.".claude/keybindings.json".source = liveDot "claude/keybindings.json";
+  home.file.".claude/statusline.sh".source = liveDot "claude/statusline.sh";
 
   # Claude Code itself rewrites settings.json (/model, /config, etc.),
   # so instead of a link to the store, put a writable copy only when it is missing

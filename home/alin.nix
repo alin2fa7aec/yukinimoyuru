@@ -7,6 +7,11 @@ let
   dot = inputs.dotfiles;
   liveDot = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/dotfiles/${path}";
   nushellDir = "${dot}/nushell";
+  # Identity shared by git and jj. The address is GitHub's noreply one, so it is safe to publish
+  user = {
+    name = "alin";
+    email = "72394482+alin2fa7aec@users.noreply.github.com";
+  };
   # Turn "@define-color name #rrggbb;" lines in nordfox.css into { name = "#rrggbb"; }. Used for the fcitx5 theme, which cannot read CSS
   nordfox = lib.listToAttrs (
     map (m: lib.nameValuePair (lib.elemAt m 0) (lib.elemAt m 1)) (
@@ -92,9 +97,6 @@ let
   };
 in
 {
-  home.username = "alin";
-  home.homeDirectory = "/home/alin";
-
   home.packages =
     (with pkgs; [
       # CLI tools
@@ -312,8 +314,7 @@ in
   programs.git = {
     enable = true;
     settings = {
-      user.name = "alin";
-      user.email = "72394482+alin2fa7aec@users.noreply.github.com";
+      inherit user;
       init.defaultBranch = "main";
       core.editor = "vim";
       core.pager = "delta";
@@ -324,8 +325,7 @@ in
   programs.jujutsu = {
     enable = true;
     settings = {
-      user.name = "alin";
-      user.email = "72394482+alin2fa7aec@users.noreply.github.com";
+      inherit user;
       ui.default-command = "log";
       ui.editor = "vim";
     };

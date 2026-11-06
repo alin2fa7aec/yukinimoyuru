@@ -70,21 +70,29 @@ let
         disabled_colors = palette true;
       };
     };
-  # User services for applets shown in the waybar tray
-  applet = description: exec: {
-    Unit = {
-      Description = description;
-      PartOf = [ "niri.service" ];
-      After = [ "waybar.service" ];
-      Wants = [ "waybar.service" ];
+  # User services that live with the niri session: they start with niri.service, stop with it,
+  # and come back 2 seconds after a crash. after and wants add units to wait for
+  niriService =
+    {
+      description,
+      exec,
+      after ? [ ],
+      wants ? [ ],
+    }:
+    {
+      Unit = {
+        Description = description;
+        PartOf = [ "niri.service" ];
+        After = [ "niri.service" ] ++ after;
+      }
+      // lib.optionalAttrs (wants != [ ]) { Wants = wants; };
+      Service = {
+        ExecStart = exec;
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+      Install.WantedBy = [ "niri.service" ];
     };
-    Service = {
-      ExecStart = exec;
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-    Install.WantedBy = [ "niri.service" ];
-  };
   qtctSettings = name: {
     Appearance = {
       style = "Fusion";
@@ -391,134 +399,96 @@ in
   xdg.configFile."swaync/nordfox.css".source = liveDot "theme/nordfox.css";
   xdg.configFile."swaylock/config".source = liveDot "swaylock/config";
 
-  # When started from niri's spawn-at-startup, it sometimes crashed right after login and never came back.
-  # Make it a user service bound to niri.service so it starts once niri is ready and restarts if it crashes
-  systemd.user.services.waybar = {
-    Unit = {
-      Description = "waybar for niri";
-      PartOf = [ "niri.service" ];
-      After = [ "niri.service" ];
+  # Long-running desktop programs are user services bound to niri.service (see niriService) rather than
+  # niri's spawn-at-startup. waybar started that way sometimes crashed right after login and never came back
+  systemd.user.services = {
+    waybar = niriService {
+      description = "waybar for niri";
+      exec = "${pkgs.waybar}/bin/waybar";
     };
-    Service = {
-      ExecStart = "${pkgs.waybar}/bin/waybar";
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-    Install.WantedBy = [ "niri.service" ];
-  };
 
-  # Wall clock at the top right of the QHD monitor. It shows the playing audio's spectrum around a circle, so it is drawn by its own program instead of waybar.
-  # The vertical bar reserves no space, so leave a right margin of its width (52px) to sit just left of the bar
-  systemd.user.services.clock-ring = {
-    Unit = {
-      Description = "wall clock with an audio spectrum ring";
-      PartOf = [ "niri.service" ];
-      After = [ "niri.service" "pipewire.service" ];
+    # Wall clock at the top right of the QHD monitor. It shows the playing audio's spectrum around a circle, so it is drawn by its own program instead of waybar.
+    # The vertical bar reserves no space, so leave a right margin of its width (52px) to sit just left of the bar
+    clock-ring = niriService {
+      description = "wall clock with an audio spectrum ring";
+      exec = lib.concatStringsSep " " [
+        "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring"
+        "--output DP-3 --margin-right 52"
+        "--theme ${dot + "/theme/nordfox.css"}"
+        "--wires ${dot + "/waybar/circuit/wires.json"}"
+      ];
+      after = [ "pipewire.service" ];
     };
-    Service = {
-      ExecStart = "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring --output DP-3 --margin-right 52 --theme ${dot + "/theme/nordfox.css"} --wires ${dot + "/waybar/circuit/wires.json"}";
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-    Install.WantedBy = [ "niri.service" ];
-  };
 
-  # Leave notifications to swaync. Bound to niri.service like waybar
-  systemd.user.services.swaync = {
-    Unit = {
-      Description = "swaync notification center for niri";
-      PartOf = [ "niri.service" ];
-      After = [ "niri.service" ];
+    # Leave notifications to swaync
+    swaync = niriService {
+      description = "swaync notification center for niri";
+      exec = "${pkgs.swaynotificationcenter}/bin/swaync";
     };
-    Service = {
-      ExecStart = "${pkgs.swaynotificationcenter}/bin/swaync";
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-    Install.WantedBy = [ "niri.service" ];
-  };
 
-  # Turn off the monitors after 36 minutes of inactivity and lock at 49 minutes. Also lock before sleep and on loginctl lock-session.
-  # While waybar's idle_inhibitor is on, niri does not report idleness, so neither happens.
-  # Start swaylock only if it is not already running, so it is not started again while locked
-  systemd.user.services.swayidle =
-    let
-      lock = "${pkgs.procps}/bin/pgrep -x swaylock || ${pkgs.swaylock}/bin/swaylock -f";
-    in
-    {
-      Unit = {
-        Description = "swayidle for niri";
-        PartOf = [ "niri.service" ];
-        After = [ "niri.service" ];
-      };
-      Service = {
-        ExecStart = lib.escapeShellArgs [
-          "${pkgs.swayidle}/bin/swayidle" "-w"
-          "timeout" "2160" "${pkgs.niri}/bin/niri msg action power-off-monitors"
-          "timeout" "2940" lock
-          "before-sleep" lock
-          "lock" lock
+    # Turn off the monitors after 36 minutes of inactivity and lock at 49 minutes. Also lock before sleep and on loginctl lock-session.
+    # While waybar's idle_inhibitor is on, niri does not report idleness, so neither happens.
+    # Start swaylock only if it is not already running, so it is not started again while locked
+    swayidle =
+      let
+        lock = "${pkgs.procps}/bin/pgrep -x swaylock || ${pkgs.swaylock}/bin/swaylock -f";
+      in
+      niriService {
+        description = "swayidle for niri";
+        exec = lib.escapeShellArgs [
+          "${pkgs.swayidle}/bin/swayidle"
+          "-w"
+          "timeout"
+          "2160"
+          "${pkgs.niri}/bin/niri msg action power-off-monitors"
+          "timeout"
+          "2940"
+          lock
+          "before-sleep"
+          lock
+          "lock"
+          lock
         ];
-        Restart = "on-failure";
-        RestartSec = 2;
       };
-      Install.WantedBy = [ "niri.service" ];
+
+    # Authentication dialog for operations that need admin privileges
+    polkit-gnome-agent = niriService {
+      description = "GNOME polkit authentication agent for niri";
+      exec = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
     };
 
-  # Authentication dialog for operations that need admin privileges
-  systemd.user.services.polkit-gnome-agent = {
-    Unit = {
-      Description = "GNOME polkit authentication agent for niri";
-      PartOf = [ "niri.service" ];
-      After = [ "niri.service" ];
+    # Record copied content in the cliphist history. Pick it again from fuzzel with niri's Mod+V
+    cliphist = niriService {
+      description = "cliphist clipboard history for niri";
+      exec = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
     };
-    Service = {
-      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-    Install.WantedBy = [ "niri.service" ];
-  };
 
-  # Record copied content in the cliphist history. Pick it again from fuzzel with niri's Mod+V
-  systemd.user.services.cliphist = {
-    Unit = {
-      Description = "cliphist clipboard history for niri";
-      PartOf = [ "niri.service" ];
-      After = [ "niri.service" ];
+    # Show the network and Bluetooth applets in the waybar tray.
+    # waybar provides the tray (StatusNotifierWatcher), so start after waybar
+    nm-applet = niriService {
+      description = "NetworkManager applet for niri";
+      exec = "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator";
+      after = [ "waybar.service" ];
+      wants = [ "waybar.service" ];
     };
-    Service = {
-      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
-      Restart = "on-failure";
-      RestartSec = 2;
+    blueman-applet = niriService {
+      description = "blueman applet for niri";
+      exec = "${pkgs.blueman}/bin/blueman-applet";
+      after = [ "waybar.service" ];
+      wants = [ "waybar.service" ];
     };
-    Install.WantedBy = [ "niri.service" ];
-  };
 
-  # Show the network and Bluetooth applets in the waybar tray.
-  # waybar provides the tray (StatusNotifierWatcher), so start after waybar
-  systemd.user.services.nm-applet = applet "NetworkManager applet for niri" "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator";
-  systemd.user.services.blueman-applet = applet "blueman applet for niri" "${pkgs.blueman}/bin/blueman-applet";
-
-  # Each monitor shows ~/.local/share/wallpaper/<output name> as its wallpaper.
-  # Images are not kept in the repository, so put the image you want at this path or symlink it,
-  # then apply with systemctl --user restart swaybg
-  systemd.user.services.swaybg = {
-    Unit = {
-      Description = "swaybg wallpaper for niri";
-      PartOf = [ "niri.service" ];
-      After = [ "niri.service" ];
-    };
-    Service = {
-      ExecStart = lib.concatStringsSep " " [
+    # Each monitor shows ~/.local/share/wallpaper/<output name> as its wallpaper.
+    # Images are not kept in the repository, so put the image you want at this path or symlink it,
+    # then apply with systemctl --user restart swaybg
+    swaybg = niriService {
+      description = "swaybg wallpaper for niri";
+      exec = lib.concatStringsSep " " [
         "${pkgs.swaybg}/bin/swaybg"
         "-o DP-3 -i %h/.local/share/wallpaper/DP-3 -m fill"
         "-o HDMI-A-1 -i %h/.local/share/wallpaper/HDMI-A-1 -m fill"
       ];
-      Restart = "on-failure";
-      RestartSec = 2;
     };
-    Install.WantedBy = [ "niri.service" ];
   };
 
   # ---- Claude Code ----

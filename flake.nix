@@ -10,6 +10,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # App config files live in their own repository; this flake only places them
+    dotfiles = {
+      url = "github:alin2fa7aec/dotfiles";
+      flake = false;
+    };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

@@ -2,7 +2,7 @@
 
 [日本語](README.ja.md)
 
-NixOS configuration and dotfiles for my desktop PC (hostname `yukiwari`). The system and the user environment are managed together with flakes and home-manager.
+NixOS configuration for my desktop PC (hostname `yukiwari`). The system and the user environment are managed together with flakes and home-manager. The application config files themselves live in [dotfiles](https://github.com/alin2fa7aec/dotfiles), which this flake reads as an input and places.
 
 ## Overview
 
@@ -20,8 +20,6 @@ NixOS configuration and dotfiles for my desktop PC (hostname `yukiwari`). The sy
 | `flake.nix` | Entry point. Defines `nixosConfigurations.yukiwari` |
 | `hosts/desktop/` | System configuration (`configuration.nix`) and hardware configuration |
 | `home/alin.nix` | User environment via home-manager |
-| `dotfiles/` | Application config files, placed by `home/alin.nix` |
-| `kanata/` | kanata configuration |
 | `pkgs/` | Packages not available in nixpkgs |
 
 ## Usage

@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-デスクトップ PC (ホスト名 `yukiwari`) の NixOS 設定と dotfiles。flakes と home-manager で、システムとユーザー環境をまとめて管理している。
+デスクトップ PC (ホスト名 `yukiwari`) の NixOS 設定。flakes と home-manager で、システムとユーザー環境をまとめて管理している。アプリケーションの設定ファイルそのものは [dotfiles](https://github.com/alin2fa7aec/dotfiles) にあり、この flake が input として読んで配置する。
 
 ## 概要
 
@@ -20,8 +20,6 @@
 | `flake.nix` | エントリーポイント。`nixosConfigurations.yukiwari` を定義する |
 | `hosts/desktop/` | システム設定 (`configuration.nix`) とハードウェア設定 |
 | `home/alin.nix` | home-manager によるユーザー環境 |
-| `dotfiles/` | アプリケーションの設定ファイル。`home/alin.nix` が配置する |
-| `kanata/` | kanata の設定 |
 | `pkgs/` | nixpkgs に無いパッケージ |
 
 ## 使い方

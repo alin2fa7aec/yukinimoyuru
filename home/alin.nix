@@ -540,6 +540,17 @@ in
       ];
     };
   };
+  # niri.service also pulls in xdg-desktop-autostart.target, which starts the applets' own autostart entries.
+  # Whichever copy came up first won, and nm-applet from the entry runs without --indicator.
+  # Hide the entries so only the services above start them
+  xdg.configFile."autostart/nm-applet.desktop".text = ''
+    [Desktop Entry]
+    Hidden=true
+  '';
+  xdg.configFile."autostart/blueman.desktop".text = ''
+    [Desktop Entry]
+    Hidden=true
+  '';
 
   # ---- Claude Code ----
   # managed-settings.json is placed in /etc/claude-code on the system side (hosts/desktop/configuration.nix)

@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "github:NixOs/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -23,7 +23,7 @@
     };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable,home-manager, ... }@inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs-unstable = import nixpkgs-unstable {
@@ -31,6 +31,12 @@
         config.allowUnfree = true;
       };
     in {
+      # `nix fmt` formats every tracked .nix file with nixfmt.
+      # hardware-configuration.nix is left as nixos-generate-config wrote it
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree.override {
+        settings.global.excludes = [ "hosts/desktop/hardware-configuration.nix" ];
+      };
+
       nixosConfigurations.yukiwari = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
@@ -46,5 +52,4 @@
         ];
       };
     };
-
 }

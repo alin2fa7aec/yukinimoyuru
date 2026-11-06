@@ -1,7 +1,10 @@
 { config, pkgs, pkgs-unstable, inputs, lib, ... }:
 let
+  # The dotfiles are used in two ways:
+  # - dot: the copy pinned by flake.lock, for files nix reads or transforms (readFile, generated colors, service arguments)
+  # - liveDot: a link straight into the checkout, for files placed as they are. Edits take effect without a rebuild
+  # Assumes the checkout lives at ~/!metier/dotfiles
   dot = inputs.dotfiles;
-  # Link into the dotfiles checkout instead of the store, for files edited often. Assumes the checkout lives at this path
   liveDot = path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/dotfiles/${path}";
   nushellDir = "${dot}/nushell";
   # Turn "@define-color name #rrggbb;" lines in nordfox.css into { name = "#rrggbb"; }. Used for the fcitx5 theme, which cannot read CSS
@@ -161,7 +164,7 @@ in
     enableBashIntegration = false;
     enableNushellIntegration = false;
   };
-  xdg.configFile."starship.toml".source = dot + "/starship.toml";
+  xdg.configFile."starship.toml".source = liveDot "starship.toml";
 
   programs.zoxide = {
     enable = true;
@@ -210,8 +213,8 @@ in
     gtk4.extraCss = builtins.readFile (dot + "/theme/gtk.css");
   };
   # @import in gtk.css resolves relative to gtk-3.0 and gtk-4.0
-  xdg.configFile."gtk-3.0/nordfox.css".source = dot + "/theme/nordfox.css";
-  xdg.configFile."gtk-4.0/nordfox.css".source = dot + "/theme/nordfox.css";
+  xdg.configFile."gtk-3.0/nordfox.css".source = liveDot "theme/nordfox.css";
+  xdg.configFile."gtk-4.0/nordfox.css".source = liveDot "theme/nordfox.css";
   # libadwaita apps and the portal decide dark mode from this setting, not the theme name
   dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
 
@@ -239,7 +242,7 @@ in
     stripRoot = false;
   }}/dict.bin";
   # karukan only reads its config file and never writes it, so a link is fine
-  xdg.configFile."karukan-im/config.toml".source = dot + "/karukan/config.toml";
+  xdg.configFile."karukan-im/config.toml".source = liveDot "karukan/config.toml";
 
   # nordfox theme for the candidate window. fcitx5's classicui draws it, so it applies to input methods other than karukan too.
   # Colors match fuzzel: a bg1 background with a thin blue border, and sel0 for the selected candidate.
@@ -335,12 +338,13 @@ in
     settings.git_protocol = "https";
   };
 
-  home.file.".vimrc".source = dot + "/vim/vimrc";
+  home.file.".vimrc".source = liveDot "vim/vimrc";
 
-  xdg.configFile."wezterm" = {
-    source = dot + "/wezterm";
-    recursive = true;
-  };
+  # Link each file rather than the directory: ~/.config/wezterm is already a real directory from earlier generations
+  xdg.configFile."wezterm/wezterm.lua".source = liveDot "wezterm/wezterm.lua";
+  xdg.configFile."wezterm/wezterm_common.lua".source = liveDot "wezterm/wezterm_common.lua";
+  xdg.configFile."wezterm/keybinds.lua".source = liveDot "wezterm/keybinds.lua";
+  xdg.configFile."wezterm/keybinds_common.lua".source = liveDot "wezterm/keybinds_common.lua";
 
   # yz for bash / nushell is defined in each shell's config, so do not use Home Manager's wrapper
   programs.yazi = {
@@ -372,20 +376,20 @@ in
       end
     '';
   };
-  xdg.configFile."yazi/yazi.toml".source = dot + "/yazi/yazi.toml";
-  xdg.configFile."yazi/keymap.toml".source = dot + "/yazi/keymap.toml";
+  xdg.configFile."yazi/yazi.toml".source = liveDot "yazi/yazi.toml";
+  xdg.configFile."yazi/keymap.toml".source = liveDot "yazi/keymap.toml";
 
-  xdg.configFile."niri/config.kdl".source = dot + "/niri/config.kdl";
-  xdg.configFile."waybar/config.jsonc".source = dot + "/waybar/config.jsonc";
-  xdg.configFile."waybar/modules.jsonc".source = dot + "/waybar/modules.jsonc";
-  xdg.configFile."waybar/style.css".source = dot + "/waybar/style.css";
+  xdg.configFile."niri/config.kdl".source = liveDot "niri/config.kdl";
+  xdg.configFile."waybar/config.jsonc".source = liveDot "waybar/config.jsonc";
+  xdg.configFile."waybar/modules.jsonc".source = liveDot "waybar/modules.jsonc";
+  xdg.configFile."waybar/style.css".source = liveDot "waybar/style.css";
   # @import in style.css resolves relative to ~/.config/waybar, so put it in the same directory
-  xdg.configFile."waybar/nordfox.css".source = dot + "/theme/nordfox.css";
-  xdg.configFile."fuzzel/fuzzel.ini".source = dot + "/fuzzel/fuzzel.ini";
-  xdg.configFile."swaync/config.json".source = dot + "/swaync/config.json";
-  xdg.configFile."swaync/style.css".source = dot + "/swaync/style.css";
-  xdg.configFile."swaync/nordfox.css".source = dot + "/theme/nordfox.css";
-  xdg.configFile."swaylock/config".source = dot + "/swaylock/config";
+  xdg.configFile."waybar/nordfox.css".source = liveDot "theme/nordfox.css";
+  xdg.configFile."fuzzel/fuzzel.ini".source = liveDot "fuzzel/fuzzel.ini";
+  xdg.configFile."swaync/config.json".source = liveDot "swaync/config.json";
+  xdg.configFile."swaync/style.css".source = liveDot "swaync/style.css";
+  xdg.configFile."swaync/nordfox.css".source = liveDot "theme/nordfox.css";
+  xdg.configFile."swaylock/config".source = liveDot "swaylock/config";
 
   # When started from niri's spawn-at-startup, it sometimes crashed right after login and never came back.
   # Make it a user service bound to niri.service so it starts once niri is ready and restarts if it crashes
@@ -519,11 +523,10 @@ in
 
   # ---- Claude Code ----
   # managed-settings.json is placed in /etc/claude-code on the system side (hosts/desktop/configuration.nix)
-  # The writing-style skill is registered on claude.ai and synced from there; only its lint is deployed here.
-  # The lint runs from the PostToolUse hook, so it stays in the store and changes only on a rebuild
+  # The writing-style skill comes from claude.ai (its source is in dotfiles); only its lint is deployed here.
+  # The lint runs from the PostToolUse hook, so unlike other placed files it stays pinned in the store
+  # and changes only on a rebuild
   home.file.".claude/writing-lint.nu".source = dot + "/claude/writing-lint.nu";
-  # Instructions, skills and keybindings are tuned often, so link them straight to the checkout:
-  # edits take effect without a rebuild, and /keybindings can write back into the repository
   home.file.".claude/CLAUDE.md".source = liveDot "claude/CLAUDE.md";
   home.file.".claude/skills/commit-message".source = liveDot "claude/skills/commit-message";
   home.file.".claude/keybindings.json".source = liveDot "claude/keybindings.json";

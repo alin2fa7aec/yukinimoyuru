@@ -144,6 +144,15 @@
     extraGroups = [ "wheel" "networkmanager" "docker" ];
   };
 
+  # sudo -A asks for the password in a fuzzel prompt instead of the terminal.
+  # Claude Code's ! has no terminal to type a password into, so this lets `! sudo -A nixos-rebuild ...` run from there.
+  # The password is still asked every time
+  environment.etc."sudo.conf".text = ''
+    Path askpass ${pkgs.writeShellScript "sudo-askpass" ''
+      exec ${pkgs.fuzzel}/bin/fuzzel --dmenu --password --prompt-only "sudo: " </dev/null
+    ''}
+  '';
+
   # Nix core
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];

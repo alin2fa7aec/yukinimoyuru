@@ -28,6 +28,12 @@ NixOS configuration for my desktop PC (hostname `yukiwari`). The system and the 
 sudo nixos-rebuild switch --flake .#yukiwari
 ```
 
+Lighter ways to apply a change:
+
+- Files placed as they are, such as the niri and waybar configs, are linked straight to the dotfiles checkout, so edits to them need no rebuild.
+- `nu scripts/home-switch.nu` applies only the home-manager part, without sudo. Changes to `home.packages` still need `nixos-rebuild`.
+- `sudo -A` asks for the password in a fuzzel prompt, so the rebuild can also run where there is no terminal to type into.
+
 `hosts/desktop/hardware-configuration.nix` is specific to this machine, so regenerate it with `nixos-generate-config` to use the configuration elsewhere.
 
 Wallpapers are not stored in the repository. Put an image at `~/.local/share/wallpaper/<output>` (e.g. `DP-3`) to show it on that monitor.

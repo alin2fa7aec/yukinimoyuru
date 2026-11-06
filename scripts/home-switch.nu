@@ -2,7 +2,7 @@
 
 # Build and activate only the home-manager part of yukiwari, as the current user and without sudo.
 #
-# What this applies: files placed by home/alin.nix, user services, dconf and other activation steps.
+# What this applies: files placed by the modules in home/, user services, dconf and other activation steps.
 # What it does not: home.packages. With useUserPackages they are installed into the system's
 # /etc/profiles/per-user, so adding or removing a package still needs nixos-rebuild.
 # The system generation is not updated either; the next nixos-rebuild switch applies the same result.

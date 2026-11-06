@@ -19,7 +19,7 @@ NixOS configuration for my desktop PC (hostname `yukiwari`). The system and the 
 | --- | --- |
 | `flake.nix` | Entry point. Defines `nixosConfigurations.yukiwari` |
 | `hosts/desktop/` | System configuration (`configuration.nix`) and hardware configuration |
-| `home/alin.nix` | User environment via home-manager |
+| `home/` | User environment via home-manager. `alin.nix` imports one module per area: `desktop.nix` (the niri session), `theme.nix`, `shell.nix`, `tools.nix`, `claude.nix` |
 | `pkgs/` | Packages not available in nixpkgs |
 
 ## Usage

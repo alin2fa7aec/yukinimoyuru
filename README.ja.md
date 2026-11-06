@@ -19,7 +19,7 @@
 | --- | --- |
 | `flake.nix` | エントリーポイント。`nixosConfigurations.yukiwari` を定義する |
 | `hosts/desktop/` | システム設定 (`configuration.nix`) とハードウェア設定 |
-| `home/alin.nix` | home-manager によるユーザー環境 |
+| `home/` | home-manager によるユーザー環境。`alin.nix` が領域ごとのモジュールを読み込む: `desktop.nix` (niri のセッション), `theme.nix`, `shell.nix`, `tools.nix`, `claude.nix` |
 | `pkgs/` | nixpkgs に無いパッケージ |
 
 ## 使い方

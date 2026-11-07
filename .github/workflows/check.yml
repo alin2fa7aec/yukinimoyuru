@@ -1,0 +1,23 @@
+# Evaluate the system configuration on every push, without building it.
+# Evaluation catches undefined names, type errors and missing files (dotfiles references go through
+# dotFile in flake.nix, which fails on a missing file), so mistakes show up before anyone runs a rebuild.
+name: check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+      - name: Check formatting
+        run: nix fmt -- --ci
+      - name: Evaluate yukiwari
+        run: nix eval --raw .#nixosConfigurations.yukiwari.config.system.build.toplevel.drvPath

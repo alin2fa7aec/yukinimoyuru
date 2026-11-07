@@ -167,6 +167,8 @@
       "networkmanager"
       "docker"
     ];
+    # Start the user manager at boot, so user services in default.target (the rclone-cloud mount) run before login
+    linger = true;
   };
 
   # sudo -A asks for the password in a fuzzel prompt instead of the terminal.

@@ -1,0 +1,18 @@
+[package]
+name = "clock-ring"
+version = "0.2.0"
+edition = "2024"
+description = "Wall clock with an audio spectrum ring, drawn on a wlr-layer-shell surface"
+license = "MIT"
+
+[dependencies]
+cairo-rs = { version = "0.22", features = ["png"] }
+libc = "0.2"
+pango = "0.22"
+pangocairo = "0.22"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+smithay-client-toolkit = { version = "0.21", default-features = false, features = ["calloop"] }
+
+[profile.release]
+lto = true

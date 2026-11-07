@@ -1,44 +1,49 @@
-# A round wall clock with an audio spectrum drawn around it (clock-ring.py).
-# Using gtk4-layer-shell from Python requires loading it before libwayland-client, so inject it with LD_PRELOAD
+# A round wall clock with an audio spectrum drawn around it (src/main.rs).
+# It draws on a wlr-layer-shell surface by itself, so it needs no GUI toolkit. cava is put on PATH for the spectrum
 {
   lib,
-  stdenvNoCC,
-  python3,
-  wrapGAppsHook4,
-  gobject-introspection,
-  gtk4,
-  gtk4-layer-shell,
+  rustPlatform,
+  pkg-config,
+  makeWrapper,
+  cairo,
+  pango,
+  glib,
   cava,
 }:
 
-stdenvNoCC.mkDerivation {
+rustPlatform.buildRustPackage {
   pname = "clock-ring";
-  version = "0.1.0";
+  version = "0.2.0";
 
-  src = ./clock-ring.py;
-  dontUnpack = true;
+  src = lib.fileset.toSource {
+    root = ./.;
+    fileset = lib.fileset.unions [
+      ./Cargo.toml
+      ./Cargo.lock
+      ./src
+    ];
+  };
+
+  cargoLock.lockFile = ./Cargo.lock;
 
   nativeBuildInputs = [
-    wrapGAppsHook4
-    gobject-introspection
+    pkg-config
+    makeWrapper
   ];
   buildInputs = [
-    gtk4
-    gtk4-layer-shell
-    (python3.withPackages (ps: [
-      ps.pygobject3
-      ps.pycairo
-    ]))
+    cairo
+    pango
+    glib
   ];
 
-  installPhase = ''
-    install -Dm755 $src $out/bin/clock-ring
+  postInstall = ''
+    wrapProgram $out/bin/clock-ring --prefix PATH : ${lib.makeBinPath [ cava ]}
   '';
 
-  preFixup = ''
-    gappsWrapperArgs+=(
-      --prefix PATH : ${lib.makeBinPath [ cava ]}
-      --set LD_PRELOAD ${gtk4-layer-shell}/lib/libgtk4-layer-shell.so
-    )
-  '';
+  meta = {
+    description = "Wall clock with an audio spectrum ring, drawn on a wlr-layer-shell surface";
+    license = lib.licenses.mit;
+    mainProgram = "clock-ring";
+    platforms = lib.platforms.linux;
+  };
 }

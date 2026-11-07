@@ -22,6 +22,14 @@ The Nix daemon is not reachable from Claude's sandbox, so builds cannot run ther
 
 The `check` workflow in GitHub Actions evaluates the system and checks the formatting on every push. It does not build, so it does not replace the commands above.
 
+What the sandbox allows:
+
+- Readable: `journalctl` (system and `--user`), unit files under `~/.config/systemd/user` and `result/etc/systemd/system`, and everything in `/nix/store`.
+- Programs already built in `/nix/store` can run, which is enough to check some changes after the user builds: `kanata --check --cfg <file>` for the kanata config, `clock-ring --preview out.png --theme ... --wires ...` to see the clock drawn to a PNG.
+- Not available: `systemctl` (the user bus included), `sudo` and `gh`. Ask the user.
+- The dotfiles checkout can be edited only with the Edit tool. Bash sees it read-only, so ask the user to run jj there.
+- Commands for the user's `!` prompt must fit on one line. For a multi-line commit message, use `$'subject\n\nbody'`.
+
 ## Commits
 
 Use Conventional Commits with a scope: `feat(desktop): ...`, `fix(kanata): ...`. Scopes in use: `desktop` (niri, waybar and other GUI pieces: `home/desktop.nix`, `home/theme.nix`), `home` (`home/alin.nix`, `home/shell.nix`, `home/tools.nix`), `kanata`, `claude` (`home/claude.nix` and the Claude Code settings), `flake`. Each module in `home/` maps to one scope, so a change that touches one module usually takes that module's scope. Omit the scope for repository-wide changes such as `docs`.

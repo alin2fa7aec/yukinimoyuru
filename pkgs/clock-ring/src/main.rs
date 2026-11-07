@@ -39,21 +39,9 @@ const FONT_SIZE: f64 = 52.0;
 const BARS: usize = 48;
 const ARC_START: f64 = 300.0 * PI / 180.0;
 const ARC_SPAN: f64 = 240.0 * PI / 180.0;
-// Matching the 150px square box from when this was a waybar clock, place a 150px-diameter circle 12px from the top of the screen.
-// Its right edge is 12px from the left edge of the vertical bar
-const RADIUS: f64 = 75.0;
-const TOP: i32 = 12;
 // The gap from the rim to the base of the bars, and the maximum bar length
 const BAR_GAP: f64 = 4.0;
 const BAR_MAX: f64 = 30.0;
-// Margin for the lines extending left of and below the circle. wires.json must have the same size
-const PAD_LEFT: i32 = 60;
-const PAD_BOTTOM: i32 = 50;
-const PAD_RIGHT: i32 = 12;
-const WIDTH: i32 = PAD_LEFT + RADIUS as i32 * 2 + PAD_RIGHT;
-const HEIGHT: i32 = TOP + RADIUS as i32 * 2 + PAD_BOTTOM;
-const CX: f64 = PAD_LEFT as f64 + RADIUS;
-const CY: f64 = TOP as f64 + RADIUS;
 // cava stops writing after sleep_timer seconds of silence. Clear the last frame once it is this old
 const STALE: Duration = Duration::from_millis(500);
 
@@ -87,9 +75,13 @@ struct Palette {
     cyan: Rgb,
 }
 
+// The clock's geometry and wiring, written by waybar/circuit/build.mjs in dotfiles.
+// The size, center and radius come from there too, so the wiring always meets the circle
 #[derive(serde::Deserialize)]
 struct Wires {
     size: [i32; 2],
+    center: [f64; 2],
+    radius: f64,
     // x, y and the opacity used in fading segments
     wires: Vec<(i32, i32, f64)>,
 }
@@ -120,8 +112,9 @@ fn load_palette(path: &str) -> Result<Palette, Error> {
 
 fn load_wires(path: &str) -> Result<Wires, Error> {
     let wires: Wires = serde_json::from_reader(File::open(path)?)?;
-    if wires.size != [WIDTH, HEIGHT] {
-        return Err(format!("{path} is {:?}, but the clock is {:?}", wires.size, [WIDTH, HEIGHT]).into());
+    let [w, h] = wires.size;
+    if w <= 0 || h <= 0 || wires.radius <= 0.0 {
+        return Err(format!("{path} has an empty size or radius").into());
     }
     Ok(wires)
 }
@@ -147,8 +140,8 @@ struct Layers {
     time: ImageSurface,
 }
 
-fn surface(scale: i32) -> Result<(ImageSurface, Context), Error> {
-    let surface = ImageSurface::create(Format::ARgb32, WIDTH * scale, HEIGHT * scale)?;
+fn surface(wires: &Wires, scale: i32) -> Result<(ImageSurface, Context), Error> {
+    let surface = ImageSurface::create(Format::ARgb32, wires.size[0] * scale, wires.size[1] * scale)?;
     let cr = Context::new(&surface)?;
     cr.scale(f64::from(scale), f64::from(scale));
     Ok((surface, cr))
@@ -156,7 +149,8 @@ fn surface(scale: i32) -> Result<(ImageSurface, Context), Error> {
 
 impl Layers {
     fn new(palette: &Palette, wires: &Wires, scale: i32, tm: &libc::tm) -> Result<Layers, Error> {
-        let (back, cr) = surface(scale)?;
+        let ([cx, cy], radius) = (wires.center, wires.radius);
+        let (back, cr) = surface(wires, scale)?;
         let (r, g, b) = palette.fg1;
         // Wiring is drawn pixel by pixel
         for &(x, y, a) in &wires.wires {
@@ -164,11 +158,11 @@ impl Layers {
             cr.set_source_rgba(r, g, b, 0.3 * a);
             cr.fill()?;
         }
-        cr.arc(CX, CY, RADIUS, 0.0, 2.0 * PI);
+        cr.arc(cx, cy, radius, 0.0, 2.0 * PI);
         let (r, g, b) = palette.bg1;
         cr.set_source_rgba(r, g, b, 0.6);
         cr.fill()?;
-        cr.arc(CX, CY, RADIUS - 0.5, 0.0, 2.0 * PI);
+        cr.arc(cx, cy, radius - 0.5, 0.0, 2.0 * PI);
         let (r, g, b) = palette.fg1;
         cr.set_source_rgba(r, g, b, 0.4);
         cr.set_line_width(1.0);
@@ -176,7 +170,7 @@ impl Layers {
         drop(cr);
 
         // Stack the hour shifted half a character left and the minute half a character right. The minute is cyan, as an accent in place of a colon
-        let (time, cr) = surface(scale)?;
+        let (time, cr) = surface(wires, scale)?;
         let mut font = pango::FontDescription::from_string(FONT);
         font.set_absolute_size(FONT_SIZE * f64::from(pango::SCALE));
         let half = FONT_SIZE * 0.25;
@@ -185,8 +179,8 @@ impl Layers {
             layout.set_font_description(Some(&font));
             layout.set_text(&format!("{value:02}"));
             let (ink, _) = layout.pixel_extents();
-            let x = CX + ox - f64::from(ink.x()) - f64::from(ink.width()) / 2.0;
-            let y = CY + oy * FONT_SIZE - f64::from(ink.y()) - f64::from(ink.height()) / 2.0;
+            let x = cx + ox - f64::from(ink.x()) - f64::from(ink.width()) / 2.0;
+            let y = cy + oy * FONT_SIZE - f64::from(ink.y()) - f64::from(ink.height()) / 2.0;
             cr.move_to(x, y + 1.0);
             cr.set_source_rgba(0.0, 0.0, 0.0, 0.6);
             pangocairo::functions::show_layout(&cr, &layout);
@@ -201,7 +195,7 @@ impl Layers {
 }
 
 /// Draw one frame into target. bars is a sequence of 0-255 values; if empty, only the circle and time are drawn
-fn paint(target: &ImageSurface, layers: &Layers, palette: &Palette, bars: &[u8]) -> Result<(), Error> {
+fn paint(target: &ImageSurface, layers: &Layers, palette: &Palette, wires: &Wires, bars: &[u8]) -> Result<(), Error> {
     let cr = Context::new(target)?;
     cr.set_operator(Operator::Source);
     cr.set_source_surface(&layers.back, 0.0, 0.0)?;
@@ -217,6 +211,7 @@ fn paint(target: &ImageSurface, layers: &Layers, palette: &Palette, bars: &[u8])
     cr.set_line_cap(LineCap::Round);
     let (r, g, b) = palette.cyan;
     cr.set_source_rgba(r, g, b, 0.7);
+    let ([cx, cy], radius) = (wires.center, wires.radius);
     let n = bars.len() as f64;
     for (i, &v) in bars.iter().enumerate() {
         if v == 0 {
@@ -225,10 +220,10 @@ fn paint(target: &ImageSurface, layers: &Layers, palette: &Palette, bars: &[u8])
         // Angles are measured clockwise with straight up as 0
         let a = ARC_START - (i as f64 + 0.5) / n * ARC_SPAN;
         let (dx, dy) = (a.sin(), -a.cos());
-        let r0 = RADIUS - BAR_GAP;
+        let r0 = radius - BAR_GAP;
         let r1 = r0 - f64::from(v) / 255.0 * BAR_MAX;
-        cr.move_to(CX + dx * r0, CY + dy * r0);
-        cr.line_to(CX + dx * r1, CY + dy * r1);
+        cr.move_to(cx + dx * r0, cy + dy * r0);
+        cr.line_to(cx + dx * r1, cy + dy * r1);
     }
     cr.stroke()?;
     cr.restore()?;
@@ -276,11 +271,11 @@ impl App {
         if self.layers.scale != self.scale || self.layers.minute != tm.tm_min {
             self.layers = Layers::new(&self.palette, &self.wires, self.scale, &tm)?;
         }
-        let (width, height) = (WIDTH * self.scale, HEIGHT * self.scale);
+        let [width, height] = self.wires.size.map(|n| n * self.scale);
         if self.frame.width() != width {
             self.frame = ImageSurface::create(Format::ARgb32, width, height)?;
         }
-        paint(&self.frame, &self.layers, &self.palette, &self.bars)?;
+        paint(&self.frame, &self.layers, &self.palette, &self.wires, &self.bars)?;
         self.frame.flush();
 
         // Reuse the last buffer unless the compositor still holds it or the size changed
@@ -460,8 +455,8 @@ fn preview(palette: &Palette, wires: &Wires, path: &str) -> Result<(), Error> {
         })
         .collect();
     let layers = Layers::new(palette, wires, 1, &local_time())?;
-    let target = ImageSurface::create(Format::ARgb32, WIDTH, HEIGHT)?;
-    paint(&target, &layers, palette, &bars)?;
+    let target = ImageSurface::create(Format::ARgb32, wires.size[0], wires.size[1])?;
+    paint(&target, &layers, palette, wires, &bars)?;
     target.write_to_png(&mut File::create(path)?)?;
     Ok(())
 }
@@ -473,7 +468,8 @@ fn run(args: Args, palette: Palette, wires: Wires) -> Result<(), Error> {
     let compositor = CompositorState::bind(&globals, &qh)?;
     let layer_shell = LayerShell::bind(&globals, &qh)?;
     let shm = Shm::bind(&globals, &qh)?;
-    let pool = SlotPool::new((WIDTH * HEIGHT * 4) as usize, &shm)?;
+    let [width, height] = wires.size;
+    let pool = SlotPool::new((width * height * 4) as usize, &shm)?;
     let tm = local_time();
 
     let mut app = App {
@@ -485,7 +481,7 @@ fn run(args: Args, palette: Palette, wires: Wires) -> Result<(), Error> {
         pool,
         buffer: None,
         layers: Layers::new(&palette, &wires, 1, &tm)?,
-        frame: ImageSurface::create(Format::ARgb32, WIDTH, HEIGHT)?,
+        frame: ImageSurface::create(Format::ARgb32, width, height)?,
         palette,
         wires,
         bars: Vec::new(),
@@ -516,7 +512,7 @@ fn run(args: Args, palette: Palette, wires: Wires) -> Result<(), Error> {
     layer.set_margin(0, args.margin_right, 0, 0);
     layer.set_exclusive_zone(-1);
     layer.set_keyboard_interactivity(KeyboardInteractivity::None);
-    layer.set_size(WIDTH as u32, HEIGHT as u32);
+    layer.set_size(width as u32, height as u32);
     layer.commit();
     app.layer = Some(layer);
 

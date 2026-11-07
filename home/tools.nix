@@ -1,5 +1,6 @@
 # Command-line tools, development toolchains, version control, vim, yazi and Zed
 {
+  lib,
   pkgs,
   pkgs-unstable,
   liveDot,
@@ -39,6 +40,8 @@ in
       cargo-binstall
       nodejs
       bun
+      # Google Drive mount (see rclone-gdrive below). Create the remote with `rclone config`
+      rclone
     ])
     ++ [
       pkgs-unstable.zed-editor
@@ -107,4 +110,35 @@ in
   };
   xdg.configFile."yazi/yazi.toml".source = liveDot "yazi/yazi.toml";
   xdg.configFile."yazi/keymap.toml".source = liveDot "yazi/keymap.toml";
+
+  # Mount the Google Drive remote "gdrive" at ~/!partage/gdrive. The remote and its OAuth token live in
+  # ~/.config/rclone/rclone.conf, written by `rclone config`, so they stay out of the store; until it exists the unit is skipped.
+  # The full VFS cache keeps opened files locally and uploads changes in the background, and --poll-interval picks up remote changes.
+  # It is in default.target, and linger (hosts/desktop) starts the user manager at boot, so it mounts before login.
+  # The user manager has no network-online.target, so a mount attempted before the network is up fails and is retried
+  systemd.user.services.rclone-gdrive =
+    let
+      mountpoint = "%h/!partage/gdrive";
+    in
+    {
+      Unit = {
+        Description = "Google Drive mounted at ~/!partage/gdrive";
+        ConditionPathExists = "%h/.config/rclone/rclone.conf";
+      };
+      Service = {
+        Type = "notify";
+        ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${mountpoint}";
+        ExecStart = lib.concatStringsSep " " [
+          "${pkgs.rclone}/bin/rclone mount gdrive: ${mountpoint}"
+          "--vfs-cache-mode full --vfs-cache-max-age 720h --vfs-cache-max-size 20G"
+          "--dir-cache-time 1h --poll-interval 1m"
+        ];
+        ExecStop = "/run/wrappers/bin/fusermount3 -u ${mountpoint}";
+        # rclone calls fusermount3, which needs the setuid wrapper
+        Environment = "PATH=/run/wrappers/bin";
+        Restart = "on-failure";
+        RestartSec = 15;
+      };
+      Install.WantedBy = [ "default.target" ];
+    };
 }

@@ -36,6 +36,14 @@
         inherit system;
         config.allowUnfree = true;
       };
+      # Path of a file in the copy of dotfiles pinned by flake.lock. A missing file stops evaluation,
+      # so a renamed or removed file is caught before anything is built or started with a dangling path
+      dotFile =
+        rel:
+        let
+          path = "${inputs.dotfiles}/${rel}";
+        in
+        if builtins.pathExists path then path else throw "dotfiles has no ${rel}";
     in
     {
       # `nix fmt` formats every tracked .nix file with nixfmt.
@@ -45,7 +53,7 @@
       };
 
       nixosConfigurations.yukiwari = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs pkgs-unstable; };
+        specialArgs = { inherit inputs pkgs-unstable dotFile; };
         modules = [
           ./hosts/desktop/configuration.nix
           home-manager.nixosModules.home-manager
@@ -53,7 +61,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit inputs pkgs-unstable; };
+            home-manager.extraSpecialArgs = { inherit inputs pkgs-unstable dotFile; };
             home-manager.users.alin = import ./home/alin.nix;
           }
         ];

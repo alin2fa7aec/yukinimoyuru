@@ -3,7 +3,7 @@
   config,
   lib,
   pkgs,
-  dot,
+  dotFile,
   liveDot,
   ...
 }:
@@ -13,7 +13,7 @@ let
     map (m: lib.nameValuePair (lib.elemAt m 0) (lib.elemAt m 1)) (
       lib.filter (m: m != null) (
         map (builtins.match "@define-color ([a-z0-9]+) (#[0-9a-f]{6});") (
-          lib.splitString "\n" (builtins.readFile (dot + "/theme/nordfox.css"))
+          lib.splitString "\n" (builtins.readFile (dotFile "theme/nordfox.css"))
         )
       )
     )
@@ -99,8 +99,8 @@ in
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
     };
-    gtk3.extraCss = builtins.readFile (dot + "/theme/gtk.css");
-    gtk4.extraCss = builtins.readFile (dot + "/theme/gtk.css");
+    gtk3.extraCss = builtins.readFile (dotFile "theme/gtk.css");
+    gtk4.extraCss = builtins.readFile (dotFile "theme/gtk.css");
   };
   # @import in gtk.css resolves relative to gtk-3.0 and gtk-4.0
   xdg.configFile."gtk-3.0/nordfox.css".source = liveDot "theme/nordfox.css";

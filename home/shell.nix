@@ -2,13 +2,10 @@
 {
   pkgs,
   pkgs-unstable,
-  dot,
+  dotFile,
   liveDot,
   ...
 }:
-let
-  nushellDir = "${dot}/nushell";
-in
 {
   home.packages = [
     pkgs-unstable.wezterm
@@ -19,7 +16,7 @@ in
   # bashrc has its own prompt and loads zoxide / fzf / ble.sh itself, so turn off Home Manager's bash integrations
   programs.bash = {
     enable = true;
-    initExtra = builtins.readFile (dot + "/bash/bashrc");
+    initExtra = builtins.readFile (dotFile "bash/bashrc");
   };
   # bashrc looks for and loads ~/.local/share/blesh/ble.sh
   home.file.".local/share/blesh".source = "${pkgs.blesh}/share/blesh";
@@ -28,10 +25,10 @@ in
   # $nu.env-path resolves to the store path behind the link, so link env.nu and color_config.nu from the same store path.
   programs.nushell = {
     enable = true;
-    configFile.source = dot + "/nushell/config.nu";
+    configFile.source = dotFile "nushell/config.nu";
   };
-  xdg.configFile."nushell/env.nu".source = "${nushellDir}/env.nu";
-  xdg.configFile."nushell/color_config.nu".source = "${nushellDir}/color_config.nu";
+  xdg.configFile."nushell/env.nu".source = dotFile "nushell/env.nu";
+  xdg.configFile."nushell/color_config.nu".source = dotFile "nushell/color_config.nu";
 
   programs.starship = {
     enable = true;

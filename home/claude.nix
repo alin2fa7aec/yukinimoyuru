@@ -3,7 +3,7 @@
   lib,
   pkgs,
   pkgs-unstable,
-  dot,
+  dotFile,
   liveDot,
   ...
 }:
@@ -18,7 +18,7 @@
   # The writing-style skill comes from claude.ai (its source is in dotfiles); only its lint is deployed here.
   # The lint runs from the PostToolUse hook, so unlike other placed files it stays pinned in the store
   # and changes only on a rebuild
-  home.file.".claude/writing-lint.nu".source = dot + "/claude/writing-lint.nu";
+  home.file.".claude/writing-lint.nu".source = dotFile "claude/writing-lint.nu";
   home.file.".claude/CLAUDE.md".source = liveDot "claude/CLAUDE.md";
   home.file.".claude/skills/commit-message".source = liveDot "claude/skills/commit-message";
   home.file.".claude/keybindings.json".source = liveDot "claude/keybindings.json";
@@ -29,7 +29,7 @@
   home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -e "$HOME/.claude/settings.json" ]; then
       run mkdir -p "$HOME/.claude"
-      run install -m 644 ${dot + "/claude/settings.json"} "$HOME/.claude/settings.json"
+      run install -m 644 ${dotFile "claude/settings.json"} "$HOME/.claude/settings.json"
     fi
   '';
 }

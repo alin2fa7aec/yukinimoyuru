@@ -3,7 +3,7 @@
   lib,
   pkgs,
   inputs,
-  dot,
+  dotFile,
   liveDot,
   ...
 }:
@@ -62,7 +62,7 @@ in
       (pkgs.writeShellApplication {
         name = "power-menu";
         runtimeInputs = [ pkgs.fuzzel ];
-        text = builtins.readFile (dot + "/fuzzel/power-menu.sh");
+        text = builtins.readFile (dotFile "fuzzel/power-menu.sh");
       })
       # Web browser
       inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -95,8 +95,8 @@ in
       exec = lib.concatStringsSep " " [
         "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring"
         "--output DP-3 --margin-right 52"
-        "--theme ${dot + "/theme/nordfox.css"}"
-        "--wires ${dot + "/waybar/circuit/wires.json"}"
+        "--theme ${dotFile "theme/nordfox.css"}"
+        "--wires ${dotFile "waybar/circuit/wires.json"}"
       ];
       after = [ "pipewire.service" ];
     };

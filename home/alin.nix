@@ -1,10 +1,6 @@
 # home-manager configuration for alin. Each imported file covers one area; the commit scopes follow the same split:
 # desktop.nix and theme.nix are desktop, shell.nix and tools.nix are home, claude.nix is claude
-{
-  config,
-  inputs,
-  ...
-}:
+{ config, ... }:
 {
   imports = [
     ./desktop.nix
@@ -14,12 +10,11 @@
     ./claude.nix
   ];
 
-  # The dotfiles are used in two ways, and both are passed to every module as arguments:
-  # - dot: the copy pinned by flake.lock, for files nix reads or transforms (readFile, generated colors, service arguments)
+  # The dotfiles are used in two ways:
+  # - dotFile (from flake.nix): the copy pinned by flake.lock, for files nix reads or transforms (readFile, generated colors, service arguments)
   # - liveDot: a link straight into the checkout, for files placed as they are. Edits take effect without a rebuild
-  # Assumes the checkout lives at ~/!metier/dotfiles
+  # liveDot is passed to every module as an argument. It assumes the checkout lives at ~/!metier/dotfiles
   _module.args = {
-    dot = inputs.dotfiles;
     liveDot =
       path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/!metier/dotfiles/${path}";
   };

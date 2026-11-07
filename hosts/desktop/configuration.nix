@@ -3,7 +3,7 @@
   lib,
   pkgs,
   pkgs-unstable,
-  inputs,
+  dotFile,
   ...
 }:
 {
@@ -138,7 +138,7 @@
     enable = true;
     keyboards.main = {
       devices = [ ];
-      configFile = "${inputs.dotfiles}/kanata/kanata-linux.kbd";
+      configFile = dotFile "kanata/kanata-linux.kbd";
     };
   };
   # kanata sometimes misses the Bluetooth MX Keys Mini because it cannot grab it yet when rescanning right after it connects.
@@ -149,8 +149,7 @@
   '';
 
   # Claude Code managed settings (apply to all users and take precedence over user settings)
-  environment.etc."claude-code/managed-settings.json".source =
-    "${inputs.dotfiles}/claude/managed-settings.json";
+  environment.etc."claude-code/managed-settings.json".source = dotFile "claude/managed-settings.json";
 
   # devenv
   programs.nix-ld.enable = true;

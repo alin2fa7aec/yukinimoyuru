@@ -133,7 +133,9 @@
   programs.gamemode.enable = true;
 
   # kanata
-  # kanata-linux.kbd contains defcfg, so pass it via configFile instead of config
+  # kanata-linux.kbd contains defcfg, so pass it via configFile instead of config.
+  # When a rebuild restarts systemd-udevd, kanata can fail to find the keyboard and exit with "No keyboard devices were found".
+  # sudo systemctl restart kanata-main.service brings it back
   services.kanata = {
     enable = true;
     keyboards.main = {

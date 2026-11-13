@@ -9,10 +9,18 @@ in
 {
   # Create the share as a btrfs subvolume (a plain directory on other file systems),
   # so it can be snapshotted on its own later
-  systemd.tmpfiles.settings."10-nas".${sharePath}.v = {
-    user = "alin";
-    group = "users";
-    mode = "0755";
+  systemd.tmpfiles.settings."10-nas" = {
+    ${sharePath}.v = {
+      user = "alin";
+      group = "users";
+      mode = "0755";
+    };
+    # Uploads from the phone land here with no folder to choose, and get sorted into the library later
+    "${sharePath}/inbox".d = {
+      user = "alin";
+      group = "users";
+      mode = "0755";
+    };
   };
 
   services.samba = {

@@ -115,10 +115,15 @@ in
   # ~/.config/rclone/rclone.conf, written by `rclone config`, so they stay out of the store; until it exists the unit is skipped.
   # The full VFS cache keeps opened files locally and uploads changes in the background, and --poll-interval picks up remote changes.
   # It is in default.target, and linger (hosts/desktop) starts the user manager at boot, so it mounts before login.
-  # The user manager has no network-online.target, so a mount attempted before the network is up fails and is retried
+  # The mount waits until systemd-timesyncd has synchronized the clock. At boot rtc_cmos reads the RTC, kept in local time, as UTC and sets the clock 9 hours ahead until NTP corrects it; an OAuth token refreshed in that window is saved with
+  # an expiry 9 hours late, so rclone keeps sending the expired token and gets 401 until that time. Waiting for the sync also
+  # covers the network, which the user manager cannot wait for because it has no network-online.target.
   systemd.user.services.rclone-cloud =
     let
       mountpoint = "%h/cloud";
+      waitForTimeSync = pkgs.writeShellScript "wait-for-time-sync" ''
+        until [ -e /run/systemd/timesync/synchronized ]; do ${pkgs.coreutils}/bin/sleep 1; done
+      '';
     in
     {
       Unit = {
@@ -127,7 +132,12 @@ in
       };
       Service = {
         Type = "notify";
-        ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${mountpoint}";
+        ExecStartPre = [
+          "${waitForTimeSync}"
+          "${pkgs.coreutils}/bin/mkdir -p ${mountpoint}"
+        ];
+        # Offline at boot, the wait times out and Restart tries again
+        TimeoutStartSec = "5min";
         ExecStart = lib.concatStringsSep " " [
           "${pkgs.rclone}/bin/rclone mount cloud: ${mountpoint}"
           "--vfs-cache-mode full --vfs-cache-max-age 720h --vfs-cache-max-size 20G"

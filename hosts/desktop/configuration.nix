@@ -7,7 +7,10 @@
   ...
 }:
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    ./nas.nix
+  ];
 
   # boot
   boot.loader.systemd-boot.enable = true;

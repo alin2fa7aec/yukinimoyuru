@@ -32,4 +32,4 @@ What the sandbox allows:
 
 ## Commits
 
-Use Conventional Commits with a scope: `feat(desktop): ...`, `fix(kanata): ...`. Scopes in use: `desktop` (niri, waybar and other GUI pieces: `home/desktop.nix`, `home/theme.nix`), `home` (`home/alin.nix`, `home/shell.nix`, `home/tools.nix`), `kanata`, `claude` (`home/claude.nix` and the Claude Code settings), `flake`. Each module in `home/` maps to one scope, so a change that touches one module usually takes that module's scope. Omit the scope for repository-wide changes such as `docs`.
+Use Conventional Commits with a scope: `feat(desktop): ...`, `fix(kanata): ...`. Scopes in use: `desktop` (niri, waybar and other GUI pieces: `home/desktop.nix`, `home/theme.nix`), `home` (`home/alin.nix`, `home/shell.nix`, `home/tools.nix`), `kanata`, `nas` (Samba file sharing: `hosts/desktop/nas.nix`), `claude` (`home/claude.nix` and the Claude Code settings), `flake`. Each module in `home/` maps to one scope, so a change that touches one module usually takes that module's scope. Omit the scope for repository-wide changes such as `docs`.

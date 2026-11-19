@@ -37,6 +37,12 @@
   };
   xdg.configFile."starship.toml".source = liveDot "starship.toml";
 
+  # Load a directory's devShell when entering it (.envrc with `use flake`). nix-direnv caches the shell and keeps it from being GCed
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
   programs.zoxide = {
     enable = true;
     enableBashIntegration = false;

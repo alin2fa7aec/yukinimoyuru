@@ -3,7 +3,8 @@
 {
   lib,
   stdenv,
-  fetchFromGitHub,
+  # The karukan source, from the flake input inputs.karukan
+  src,
   rustPlatform,
   cargo,
   rustc,
@@ -16,15 +17,10 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "fcitx5-karukan";
-  version = "0.1.0-unstable-2026-11-02";
-
-  # The only release is v0.1.0 from 2026-02 and much has changed since, so use a commit on main
-  src = fetchFromGitHub {
-    owner = "togatoga";
-    repo = "karukan";
-    rev = "1b0d5ea8307ba8f0252f7df3153be712323d1c58";
-    hash = "sha256-CKETnU4qb8zfd5qzYAJFSAyr5pW9pbaldY9iowYU5PE=";
-  };
+  # The only release is v0.1.0 from 2026-02 and much has changed since, so follow a commit on main.
+  # A path: override has no lastModifiedDate, so fall back to "dirty"
+  version = "0.1.0-unstable-" + (builtins.substring 0 8 (src.lastModifiedDate or "dirty"));
+  inherit src;
 
   # Cargo.lock has no git dependencies, so fetch the dependency crates from Cargo.lock without writing a hash
   cargoDeps = rustPlatform.importCargoLock {

@@ -37,6 +37,22 @@
         "type": "github"
       }
     },
+    "karukan": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794629110,
+        "narHash": "sha256-Lv+a/JUeGX9pYvsquyyQlJHNG43AIoHg2caP87CvYvM=",
+        "owner": "togatoga",
+        "repo": "karukan",
+        "rev": "4ed2450a4389c01cb8c929fabde419236eb11d53",
+        "type": "github"
+      },
+      "original": {
+        "owner": "togatoga",
+        "repo": "karukan",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1793633738,
@@ -73,6 +89,7 @@
       "inputs": {
         "dotfiles": "dotfiles",
         "home-manager": "home-manager",
+        "karukan": "karukan",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "zen-browser": "zen-browser"

@@ -3,6 +3,7 @@
   lib,
   pkgs,
   pkgs-unstable,
+  inputs,
   dotFile,
   ...
 }:
@@ -77,7 +78,7 @@
     enable = true;
     type = "fcitx5";
     fcitx5.waylandFrontend = true;
-    fcitx5.addons = [ (pkgs.callPackage ../../pkgs/fcitx5-karukan.nix { }) ];
+    fcitx5.addons = [ (pkgs.callPackage ../../pkgs/fcitx5-karukan.nix { src = inputs.karukan; }) ];
     # Theme for the candidate window (home/theme.nix puts it in ~/.local/share/fcitx5/themes/nordfox).
     # Using the accent color changes the selected candidate's color to the desktop's, so turn it off.
     # This is written to /etc/xdg, so saving the Classic User Interface in fcitx5-configtool makes the ~/.config copy take precedence

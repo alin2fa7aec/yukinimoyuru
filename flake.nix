@@ -16,6 +16,13 @@
       flake = false;
     };
 
+    # Source of the karukan IME built by pkgs/fcitx5-karukan.nix. Point it at a fork to carry local changes,
+    # and try uncommitted ones with --override-input karukan path:<checkout>
+    karukan = {
+      url = "github:togatoga/karukan";
+      flake = false;
+    };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

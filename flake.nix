@@ -59,6 +59,22 @@
         settings.global.excludes = [ "hosts/desktop/hardware-configuration.nix" ];
       };
 
+      # Shell for working on the karukan checkout with cargo, using the same build inputs as pkgs/fcitx5-karukan.nix.
+      # The fork carries no Nix files, so its untracked .envrc loads this with `use flake <this repo>#karukan`
+      devShells.${system}.karukan =
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.mkShell {
+          inputsFrom = [ (pkgs.callPackage ./pkgs/fcitx5-karukan.nix { src = inputs.karukan; }) ];
+          packages = with pkgs; [
+            clippy
+            rustfmt
+            rust-analyzer
+          ];
+          env.RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+        };
+
       nixosConfigurations.yukiwari = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs pkgs-unstable dotFile; };
         modules = [

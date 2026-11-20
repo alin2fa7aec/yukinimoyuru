@@ -40,15 +40,16 @@
     "karukan": {
       "flake": false,
       "locked": {
-        "lastModified": 1794629110,
-        "narHash": "sha256-Lv+a/JUeGX9pYvsquyyQlJHNG43AIoHg2caP87CvYvM=",
-        "owner": "togatoga",
+        "lastModified": 1795096416,
+        "narHash": "sha256-ueo7E4happTEEbEvHXTQ6q1Z7o1tJelZghKzcAvKJ9U=",
+        "owner": "alin2fa7aec",
         "repo": "karukan",
-        "rev": "4ed2450a4389c01cb8c929fabde419236eb11d53",
+        "rev": "725f66fcd377612a1840ac2fdc2b5a6ddca5e09b",
         "type": "github"
       },
       "original": {
-        "owner": "togatoga",
+        "owner": "alin2fa7aec",
+        "ref": "yukiwari",
         "repo": "karukan",
         "type": "github"
       }

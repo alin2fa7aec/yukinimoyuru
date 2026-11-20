@@ -16,10 +16,11 @@
       flake = false;
     };
 
-    # Source of the karukan IME built by pkgs/fcitx5-karukan.nix. Point it at a fork to carry local changes,
-    # and try uncommitted ones with --override-input karukan path:<checkout>
+    # Source of the karukan IME built by pkgs/fcitx5-karukan.nix. The yukiwari branch of the fork merges the
+    # feature branches proposed upstream; point this back at togatoga/karukan once they are all merged.
+    # Try uncommitted changes with --override-input karukan path:<checkout>
     karukan = {
-      url = "github:togatoga/karukan";
+      url = "github:alin2fa7aec/karukan?ref=yukiwari";
       flake = false;
     };
 

@@ -67,7 +67,23 @@
   programs.dconf.enable = true;
   # The app xdg-open uses for directories. Otherwise zathura-cb (a comic book plugin), which claims to handle directories, gets picked.
   # Zen Browser rewrites ~/.config/mimeapps.list, so write to /etc/xdg/mimeapps.list
-  xdg.mime.defaultApplications."inode/directory" = "dev.zed.Zed.desktop";
+  # mimeapps.list takes no wildcards such as video/*, so list the common video types for Glide (installed in home/desktop.nix).
+  # Without this, xdg-open picks Firefox, the only app that claims them
+  xdg.mime.defaultApplications = {
+    "inode/directory" = "dev.zed.Zed.desktop";
+  }
+  // lib.genAttrs [
+    "video/mp4"
+    "video/x-matroska"
+    "video/webm"
+    "video/quicktime"
+    "video/x-msvideo"
+    "video/mpeg"
+    "video/ogg"
+    "video/x-flv"
+    "video/3gpp"
+    "video/mp2t"
+  ] (_: "net.base_art.Glide.desktop");
   # blueman-applet for the waybar tray, and the Bluetooth settings
   services.blueman.enable = true;
   services.xserver.xkb.layout = "jp";

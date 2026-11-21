@@ -33,7 +33,6 @@ in
       mediainfo
       exiftool
       # develop
-      rustup
       gcc
       pkg-config
       gnumake
@@ -42,6 +41,16 @@ in
       bun
       # Google Drive mount (see rclone-cloud below). Create the remote with `rclone config`
       rclone
+    ])
+    # Rust comes from nixpkgs rather than rustup: Claude's sandbox cannot write ~/.rustup, so every toolchain install
+    # or update through rustup needed a manual step. Taken from unstable to track the latest stable compiler, and all
+    # from the same set so the versions match. rust-toolchain.toml is ignored; a project that needs another version gets a devShell
+    ++ (with pkgs-unstable; [
+      rustc
+      cargo
+      clippy
+      rustfmt
+      rust-analyzer
     ])
     ++ [
       pkgs-unstable.zed-editor

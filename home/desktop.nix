@@ -66,6 +66,25 @@ in
       })
       # Web browser
       inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+      # Video player. The package ships only the base, good and bad GStreamer plugins, which cannot decode
+      # H.264 or AAC, so add libav and ugly to its plugin path. Wrapping it avoids rebuilding glide
+      (pkgs.symlinkJoin {
+        name = "glide-media-player-with-codecs";
+        paths = [ pkgs.glide-media-player ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/glide \
+            --prefix GST_PLUGIN_SYSTEM_PATH_1_0 : ${
+              lib.makeSearchPath "lib/gstreamer-1.0" (
+                with pkgs.gst_all_1;
+                [
+                  gst-libav
+                  gst-plugins-ugly
+                ]
+              )
+            }
+        '';
+      })
     ];
 
   xdg.configFile."niri/config.kdl".source = liveDot "niri/config.kdl";

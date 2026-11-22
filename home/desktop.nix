@@ -56,6 +56,8 @@ in
       imv
       # Cropping and annotating images (satty --filename <image>)
       satty
+      # emulator
+      emulator
     ])
     ++ [
       # Power menu (niri's Ctrl+Alt+Delete and the power box in waybar)

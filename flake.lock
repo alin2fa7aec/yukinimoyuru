@@ -61,11 +61,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795398369,
-        "narHash": "sha256-emXSJktAqwwlAQXRulJS5+Z66Zxs+lv4QLBOFCfh29I=",
+        "lastModified": 1795410104,
+        "narHash": "sha256-pfazxD3Z2/JMKn+QIYDX9ON4SsSEbLz4w+XOdHPx7ps=",
         "ref": "refs/heads/main",
-        "rev": "f216a4c2e008bed2119dc4f4f1bbb378c852c630",
-        "revCount": 9,
+        "rev": "4af21ce9513d9b812309b243335abea63fb7f4b7",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/alin2fa7aec/lumier"
       },

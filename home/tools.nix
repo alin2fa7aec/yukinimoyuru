@@ -39,6 +39,8 @@ in
       cargo-binstall
       nodejs
       bun
+      # Not for my own use: other people's repositories call python3 in scripts and build steps
+      python3
       # Google Drive mount (see rclone-cloud below). Create the remote with `rclone config`
       rclone
     ])

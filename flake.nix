@@ -24,6 +24,15 @@
       flake = false;
     };
 
+    # Photo library viewer served by hosts/desktop/lumier.nix. Try uncommitted changes with
+    # --override-input lumier path:/home/alin/src/lumier
+    lumier = {
+      # Fetched over SSH while the repository is private: github: goes through the API, which needs a token.
+      # Switch back to github:alin2fa7aec/lumier once it is public
+      url = "git+ssh://git@github.com/alin2fa7aec/lumier";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

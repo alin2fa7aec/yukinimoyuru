@@ -54,6 +54,26 @@
         "type": "github"
       }
     },
+    "lumier": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795398369,
+        "narHash": "sha256-emXSJktAqwwlAQXRulJS5+Z66Zxs+lv4QLBOFCfh29I=",
+        "ref": "refs/heads/main",
+        "rev": "f216a4c2e008bed2119dc4f4f1bbb378c852c630",
+        "revCount": 9,
+        "type": "git",
+        "url": "ssh://git@github.com/alin2fa7aec/lumier"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/alin2fa7aec/lumier"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1795137884,
@@ -91,6 +111,7 @@
         "dotfiles": "dotfiles",
         "home-manager": "home-manager",
         "karukan": "karukan",
+        "lumier": "lumier",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "zen-browser": "zen-browser"

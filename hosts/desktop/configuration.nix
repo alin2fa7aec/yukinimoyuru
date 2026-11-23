@@ -11,6 +11,7 @@
   imports = [
     ./hardware-configuration.nix
     ./nas.nix
+    ./lumier.nix
   ];
 
   # boot

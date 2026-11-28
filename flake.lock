@@ -130,7 +130,28 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "private": "private",
+        "toyomu": "toyomu",
         "zen-browser": "zen-browser"
+      }
+    },
+    "toyomu": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795862922,
+        "narHash": "sha256-r481Ou+AK7s0PC8rX21cimVq+4BK69uWjvmhjEfj0gE=",
+        "owner": "alin2fa7aec",
+        "repo": "toyomu",
+        "rev": "37a5afd7217308fc72dfeccaeb76b1ced7ee15ed",
+        "type": "github"
+      },
+      "original": {
+        "owner": "alin2fa7aec",
+        "repo": "toyomu",
+        "type": "github"
       }
     },
     "zen-browser": {

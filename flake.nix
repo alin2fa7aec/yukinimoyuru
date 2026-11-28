@@ -40,6 +40,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Wall clock with an audio spectrum ring, started in home/desktop.nix. Try uncommitted changes with
+    # --override-input toyomu path:<checkout>
+    toyomu = {
+      url = "github:alin2fa7aec/toyomu";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";

@@ -136,12 +136,13 @@ in
       exec = "${pkgs.waybar}/bin/waybar";
     };
 
-    # Wall clock at the top right of the left monitor. It shows the playing audio's spectrum around a circle, so it is drawn by its own program instead of waybar.
+    # Wall clock at the top right of the left monitor (toyomu, inputs.toyomu). It shows the playing audio's spectrum around a circle,
+    # so it is drawn by its own program instead of waybar.
     # The vertical bar reserves no space, so leave a right margin of its width (52px) to sit just left of the bar
-    clock-ring = niriService {
-      description = "wall clock with an audio spectrum ring";
+    toyomu = niriService {
+      description = "toyomu wall clock with an audio spectrum ring";
       exec = lib.concatStringsSep " " [
-        "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring"
+        "${lib.getExe inputs.toyomu.packages.${pkgs.stdenv.hostPlatform.system}.default}"
         "--output ${outputs.left.name} --margin-right 52"
         "--theme ${dotFile "theme/nordfox.css"}"
         "--wires ${dotFile "waybar/circuit/wires.json"}"

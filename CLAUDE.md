@@ -27,7 +27,7 @@ The `check` workflow in GitHub Actions evaluates the system and checks the forma
 What the sandbox allows:
 
 - Readable: `journalctl` (system and `--user`), unit files under `~/.config/systemd/user` and `result/etc/systemd/system`, and everything in `/nix/store`.
-- Programs already built in `/nix/store` can run, which is enough to check some changes after the user builds: `kanata --check --cfg <file>` for the kanata config, `clock-ring --preview out.png --theme ... --wires ...` to see the clock drawn to a PNG.
+- Programs already built in `/nix/store` can run, which is enough to check some changes after the user builds: `kanata --check --cfg <file>` for the kanata config, `toyomu --preview out.png --theme ... --wires ...` to see the clock drawn to a PNG.
 - Not available: `systemctl` (the user bus included), `sudo` and `gh`. Ask the user.
 - The dotfiles checkout can be edited only with the Edit tool. Bash sees it read-only, so ask the user to run jj there.
 - Commands for the user's `!` prompt must fit on one line. For a multi-line commit message, use `$'subject\n\nbody'`.

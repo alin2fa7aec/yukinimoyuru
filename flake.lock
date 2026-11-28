@@ -62,10 +62,10 @@
       },
       "locked": {
         "lastModified": 1795437299,
-        "narHash": "sha256-y+5/Q33iYA3EZImoBT0HJ2mlp22Gq5kfph4VmJmz2eA=",
+        "narHash": "sha256-8FeG6fx3chfS3OVdvXs9NU0QFSGIRic0Su+oMqGfS5k=",
         "owner": "alin2fa7aec",
         "repo": "lumier",
-        "rev": "60f3ad80b7ebc9d01d598d62e604f752bf75fb0c",
+        "rev": "ca8bd6c5b876473af4e25bb53c5bb5111a9becfd",
         "type": "github"
       },
       "original": {

@@ -109,10 +109,10 @@
     "private": {
       "flake": false,
       "locked": {
-        "lastModified": 1795851428,
-        "narHash": "sha256-I4QQFpBDMf3+huIENbwoqEht1kUgroeEHXjiW0+zRnA=",
-        "rev": "bb51f1e0a6396b0f538149bfc6c4bff511a480aa",
-        "revCount": 2,
+        "lastModified": 1795867147,
+        "narHash": "sha256-w21+qlG0YPKuXqAEPtru5U8hCrGVoG1ptN7rX3jtk+M=",
+        "rev": "d636d5a23988ec097f4e28aa8285644e065cdf0a",
+        "revCount": 3,
         "type": "git",
         "url": "file:///etc/nixos"
       },

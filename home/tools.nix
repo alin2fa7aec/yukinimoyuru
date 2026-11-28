@@ -1,6 +1,5 @@
 # Command-line tools, development toolchains, version control, vim, yazi and Zed
 {
-  lib,
   pkgs,
   pkgs-unstable,
   liveDot,
@@ -41,8 +40,6 @@ in
       bun
       # Not for my own use: other people's repositories call python3 in scripts and build steps
       python3
-      # Google Drive mount (see rclone-cloud below). Create the remote with `rclone config`
-      rclone
     ])
     # Rust comes from nixpkgs rather than rustup: Claude's sandbox cannot write ~/.rustup, so every toolchain install
     # or update through rustup needed a manual step. Taken from unstable to track the latest stable compiler, and all
@@ -121,45 +118,4 @@ in
   };
   xdg.configFile."yazi/yazi.toml".source = liveDot "yazi/yazi.toml";
   xdg.configFile."yazi/keymap.toml".source = liveDot "yazi/keymap.toml";
-
-  # Mount the Google Drive remote "cloud" at ~/cloud. The remote and its OAuth token live in
-  # ~/.config/rclone/rclone.conf, written by `rclone config`, so they stay out of the store; until it exists the unit is skipped.
-  # The full VFS cache keeps opened files locally and uploads changes in the background, and --poll-interval picks up remote changes.
-  # It is in default.target, and linger (hosts/desktop) starts the user manager at boot, so it mounts before login.
-  # The mount waits until systemd-timesyncd has synchronized the clock. At boot rtc_cmos reads the RTC, kept in local time, as UTC and sets the clock 9 hours ahead until NTP corrects it; an OAuth token refreshed in that window is saved with
-  # an expiry 9 hours late, so rclone keeps sending the expired token and gets 401 until that time. Waiting for the sync also
-  # covers the network, which the user manager cannot wait for because it has no network-online.target.
-  systemd.user.services.rclone-cloud =
-    let
-      mountpoint = "%h/cloud";
-      waitForTimeSync = pkgs.writeShellScript "wait-for-time-sync" ''
-        until [ -e /run/systemd/timesync/synchronized ]; do ${pkgs.coreutils}/bin/sleep 1; done
-      '';
-    in
-    {
-      Unit = {
-        Description = "Google Drive mounted at ~/cloud";
-        ConditionPathExists = "%h/.config/rclone/rclone.conf";
-      };
-      Service = {
-        Type = "notify";
-        ExecStartPre = [
-          "${waitForTimeSync}"
-          "${pkgs.coreutils}/bin/mkdir -p ${mountpoint}"
-        ];
-        # Offline at boot, the wait times out and Restart tries again
-        TimeoutStartSec = "5min";
-        ExecStart = lib.concatStringsSep " " [
-          "${pkgs.rclone}/bin/rclone mount cloud: ${mountpoint}"
-          "--vfs-cache-mode full --vfs-cache-max-age 720h --vfs-cache-max-size 20G"
-          "--dir-cache-time 1h --poll-interval 1m"
-        ];
-        ExecStop = "/run/wrappers/bin/fusermount3 -u ${mountpoint}";
-        # rclone calls fusermount3, which needs the setuid wrapper
-        Environment = "PATH=/run/wrappers/bin";
-        Restart = "on-failure";
-        RestartSec = 15;
-      };
-      Install.WantedBy = [ "default.target" ];
-    };
 }

@@ -17,14 +17,20 @@
 
 | パス | 内容 |
 | --- | --- |
-| `flake.nix` | エントリーポイント。`nixosConfigurations.yukiwari` を定義する |
+| `flake.nix` | エントリーポイント。`nixosConfigurations.yukiwari` を定義し、以下の層を組み合わせる |
+| `modules/` | option を宣言するだけで値を持たないモジュール (`nixos/`: LAN のファイル共有と lumier の写真ミュージアム、`home/`: rclone のマウント) |
 | `hosts/desktop/` | システム設定 (`configuration.nix`) とハードウェア設定 |
 | `home/` | home-manager によるユーザー環境。`alin.nix` が領域ごとのモジュールを読み込む: `desktop.nix` (niri のセッション), `theme.nix`, `shell.nix`, `tools.nix`, `claude.nix` |
 | `pkgs/` | nixpkgs に無いパッケージ |
+| `ci/private/` | CI で非公開の input の代わりに使う仮の値 |
+
+どのディレクトリを共有や配信に使うか、ローカルネットワークの構成など、マシンではなく持ち主に関わる値はこのリポジトリに置いていない。flake の input `private` から取る。これは公開していないローカルのリポジトリで、その `nixos.nix` と `home.nix` が `modules/` で宣言した option に値を設定する。
 
 ## 使い方
 
 [dotfiles](https://github.com/alin2fa7aec/dotfiles) を `~/src/dotfiles` にチェックアウトしてあることを前提にしている。niri や waybar の設定のようにそのまま配置するファイルは、Nix store ではなくこのチェックアウトへリンクするので、チェックアウトが無いとその多くがリンク切れになる。nix が読んだり変換したりするファイルは `flake.lock` で固定したコピーから取るので、チェックアウトが無くても動く。
+
+また、非公開のリポジトリが `~/src/yukinihimuru` にあることも前提にしている。それが無い環境でビルドするには、`--override-input private path:./ci/private` で input を仮の値に差し替える。
 
 ```sh
 sudo nixos-rebuild switch --flake .#yukiwari

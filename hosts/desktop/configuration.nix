@@ -8,11 +8,7 @@
   ...
 }:
 {
-  imports = [
-    ./hardware-configuration.nix
-    ./nas.nix
-    ./lumier.nix
-  ];
+  imports = [ ./hardware-configuration.nix ];
 
   # boot
   boot.loader.systemd-boot.enable = true;
@@ -170,8 +166,15 @@
     ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_KEYBOARD}=="1", ATTRS{name}=="keyboard", RUN+="${pkgs.systemd}/bin/systemctl --no-block try-restart kanata-main.service"
   '';
 
-  # Claude Code managed settings (apply to all users and take precedence over user settings)
-  environment.etc."claude-code/managed-settings.json".source = dotFile "claude/managed-settings.json";
+  # Claude Code managed settings (apply to all users and take precedence over user settings).
+  # Values in env are paths, and a leading ~/ in them is expanded to alin's home directory here
+  environment.etc."claude-code/managed-settings.json".text =
+    let
+      settings = lib.importJSON (dotFile "claude/managed-settings.json");
+      home = config.users.users.alin.home;
+      expandHome = v: if lib.hasPrefix "~/" v then "${home}/${lib.removePrefix "~/" v}" else v;
+    in
+    builtins.toJSON (settings // { env = lib.mapAttrs (_: expandHome) (settings.env or { }); });
 
   # devenv
   programs.nix-ld.enable = true;
@@ -188,7 +191,7 @@
       "networkmanager"
       "docker"
     ];
-    # Start the user manager at boot, so user services in default.target (the rclone-cloud mount) run before login
+    # Start the user manager at boot, so user services in default.target (the rclone mounts) run before login
     linger = true;
   };
 

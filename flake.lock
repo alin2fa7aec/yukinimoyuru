@@ -3,11 +3,11 @@
     "dotfiles": {
       "flake": false,
       "locked": {
-        "lastModified": 1795216512,
-        "narHash": "sha256-5ybLZ4kT+5kluXjr7ziUJiY1kpPGDbmWBV+y23jrm8o=",
+        "lastModified": 1795846489,
+        "narHash": "sha256-deDkTKJwCDseVsYCTeEht1Hm/7k8yQlCVj7SVfZJPes=",
         "owner": "alin2fa7aec",
         "repo": "dotfiles",
-        "rev": "630fb7f1cc99babb8dff8ca31500e6eb7e010253",
+        "rev": "8937efd31289712417729fb115b0c3feaa7c5f48",
         "type": "github"
       },
       "original": {
@@ -106,6 +106,21 @@
         "type": "github"
       }
     },
+    "private": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795846450,
+        "narHash": "sha256-y+sTxXrRfglSP13Bc9fyKpO53k6ah8xGtk9TjOXGQwg=",
+        "rev": "e3801e146484266363c094167ca62137061d7d07",
+        "revCount": 1,
+        "type": "git",
+        "url": "file:///home/alin/src/yukinihimuru"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/alin/src/yukinihimuru"
+      }
+    },
     "root": {
       "inputs": {
         "dotfiles": "dotfiles",
@@ -114,6 +129,7 @@
         "lumier": "lumier",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "private": "private",
         "zen-browser": "zen-browser"
       }
     },

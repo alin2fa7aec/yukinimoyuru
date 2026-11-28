@@ -17,14 +17,20 @@ NixOS configuration for my desktop PC (hostname `yukiwari`). The system and the 
 
 | Path | Contents |
 | --- | --- |
-| `flake.nix` | Entry point. Defines `nixosConfigurations.yukiwari` |
+| `flake.nix` | Entry point. Defines `nixosConfigurations.yukiwari` and puts the layers below together |
+| `modules/` | Modules with options and no values of their own (`nixos/`: the LAN file share, the lumier photo museums; `home/`: rclone mounts) |
 | `hosts/desktop/` | System configuration (`configuration.nix`) and hardware configuration |
 | `home/` | User environment via home-manager. `alin.nix` imports one module per area: `desktop.nix` (the niri session), `theme.nix`, `shell.nix`, `tools.nix`, `claude.nix` |
 | `pkgs/` | Packages not available in nixpkgs |
+| `ci/private/` | Placeholder values standing in for the private input in CI |
+
+Values that concern the owner rather than the machine, such as which directories are shared or served and the local network, are not in this repository. They come from the flake input `private`, a local unpublished repository whose `nixos.nix` and `home.nix` set the options declared under `modules/`.
 
 ## Usage
 
 The configuration expects a checkout of [dotfiles](https://github.com/alin2fa7aec/dotfiles) at `~/src/dotfiles`. Files placed as they are, such as the niri and waybar configs, link into that checkout instead of the Nix store, so without it most of them end up as dangling links. Files that nix reads or transforms come from the copy pinned in `flake.lock` and work either way.
+
+It also expects the private repository at `~/src/yukinihimuru`. To build without it, point the input at the placeholders with `--override-input private path:./ci/private`.
 
 ```sh
 sudo nixos-rebuild switch --flake .#yukiwari

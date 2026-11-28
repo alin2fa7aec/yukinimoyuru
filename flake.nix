@@ -16,6 +16,14 @@
       flake = false;
     };
 
+    # Values that are about the owner rather than the machine: the collections lumier serves, the LAN share,
+    # the network, the cloud mounts. A local, unpublished repository holding nixos.nix and home.nix, which set the
+    # yuki.* options declared under modules/. CI evaluates with the placeholder values in ci/private instead
+    private = {
+      url = "git+file:///home/alin/src/yukinihimuru";
+      flake = false;
+    };
+
     # Source of the karukan IME built by pkgs/fcitx5-karukan.nix. The yukiwari branch of the fork merges the
     # feature branches proposed upstream; point this back at togatoga/karukan once they are all merged.
     # Try uncommitted changes with --override-input karukan path:<checkout>
@@ -24,7 +32,7 @@
       flake = false;
     };
 
-    # Photo library viewer served by hosts/desktop/lumier.nix. Try uncommitted changes with
+    # Photo library viewer served by modules/nixos/photo-museums.nix. Try uncommitted changes with
     # --override-input lumier path:/home/alin/src/lumier
     lumier = {
       url = "github:alin2fa7aec/lumier";
@@ -83,17 +91,27 @@
           env.RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
         };
 
+      # The system is put together in three layers:
+      # - modules/: mechanisms with options and no values
+      # - hosts/ and home/: this machine and its user, published
+      # - inputs.private: values about the owner, kept out of this repository
       nixosConfigurations.yukiwari = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs pkgs-unstable dotFile; };
         modules = [
+          ./modules/nixos
           ./hosts/desktop/configuration.nix
+          "${inputs.private}/nixos.nix"
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
             home-manager.extraSpecialArgs = { inherit inputs pkgs-unstable dotFile; };
-            home-manager.users.alin = import ./home/alin.nix;
+            home-manager.sharedModules = [ ./modules/home ];
+            home-manager.users.alin.imports = [
+              ./home/alin.nix
+              "${inputs.private}/home.nix"
+            ];
           }
         ];
       };

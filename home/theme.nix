@@ -79,11 +79,10 @@ let
 in
 {
   # ---- fonts ----
-  # Font rendering for this machine's monitors. subpixelRendering must match the panel's subpixel layout, so revisit it on other hardware
+  # subpixelRendering depends on the monitor's subpixel layout, so it is set by the private input
   fonts.fontconfig = {
     antialiasing = true;
     hinting = "slight";
-    subpixelRendering = "rgb";
   };
 
   # ---- GTK and Qt ----
@@ -144,7 +143,7 @@ in
         Metadata = {
           Name = "Nordfox";
           Version = 1;
-          Author = "alin";
+          Author = "yukinimoyuru";
           Description = "nordfox (nightfox.nvim)";
           ScaleWithDPI = "True";
         };

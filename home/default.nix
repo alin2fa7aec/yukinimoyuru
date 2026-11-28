@@ -1,4 +1,4 @@
-# home-manager configuration for alin. Each imported file covers one area; the commit scopes follow the same split:
+# home-manager configuration for the desktop user (yuki.user). Each imported file covers one area; the commit scopes follow the same split:
 # desktop.nix and theme.nix are desktop, shell.nix and tools.nix are home, claude.nix is claude
 { config, ... }:
 {
@@ -9,15 +9,6 @@
     ./tools.nix
     ./claude.nix
   ];
-
-  # The dotfiles are used in two ways:
-  # - dotFile (from flake.nix): the copy pinned by flake.lock, for files nix reads or transforms (readFile, generated colors, service arguments)
-  # - liveDot: a link straight into the checkout, for files placed as they are. Edits take effect without a rebuild
-  # liveDot is passed to every module as an argument. It assumes the checkout lives at ~/src/dotfiles
-  _module.args = {
-    liveDot =
-      path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/src/dotfiles/${path}";
-  };
 
   # Create only ~/downloads in the home directory.
   # xdg-user-dirs-update fills in directories missing from user-dirs.dirs with defaults like ~/Pictures,

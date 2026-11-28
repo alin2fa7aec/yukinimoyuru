@@ -16,11 +16,12 @@
       flake = false;
     };
 
-    # Values that are about the owner rather than the machine: the collections lumier serves, the LAN share,
-    # the network, the cloud mounts. A local, unpublished repository holding nixos.nix and home.nix, which set the
-    # yuki.* options declared under modules/. CI evaluates with the placeholder values in ci/private instead
+    # Everything specific to the owner and the hardware: the user, the disks and drivers, the monitors, the LAN,
+    # what is shared and served, and personal software. A local, unpublished repository whose nixos.nix and home.nix
+    # set the yuki.* options declared under modules/ and any other option directly.
+    # CI evaluates with the placeholder values in ci/private instead
     private = {
-      url = "git+file:///home/alin/src/yukinihimuru";
+      url = "git+file:///etc/nixos";
       flake = false;
     };
 
@@ -33,7 +34,7 @@
     };
 
     # Photo library viewer served by modules/nixos/photo-museums.nix. Try uncommitted changes with
-    # --override-input lumier path:/home/alin/src/lumier
+    # --override-input lumier path:<checkout>
     lumier = {
       url = "github:alin2fa7aec/lumier";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -69,11 +70,8 @@
         if builtins.pathExists path then path else throw "dotfiles has no ${rel}";
     in
     {
-      # `nix fmt` formats every tracked .nix file with nixfmt.
-      # hardware-configuration.nix is left as nixos-generate-config wrote it
-      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree.override {
-        settings.global.excludes = [ "hosts/desktop/hardware-configuration.nix" ];
-      };
+      # `nix fmt` formats every tracked .nix file with nixfmt
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
 
       # Shell for working on the karukan checkout with cargo, using the same build inputs as pkgs/fcitx5-karukan.nix.
       # The fork carries no Nix files, so its untracked .envrc loads this with `use flake <this repo>#karukan`
@@ -93,8 +91,8 @@
 
       # The system is put together in three layers:
       # - modules/: mechanisms with options and no values
-      # - hosts/ and home/: this machine and its user, published
-      # - inputs.private: values about the owner, kept out of this repository
+      # - hosts/ and home/: the desktop built from them, published
+      # - inputs.private: the owner and the hardware, kept out of this repository
       nixosConfigurations.yukiwari = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs pkgs-unstable dotFile; };
         modules = [
@@ -102,17 +100,20 @@
           ./hosts/desktop/configuration.nix
           "${inputs.private}/nixos.nix"
           home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit inputs pkgs-unstable dotFile; };
-            home-manager.sharedModules = [ ./modules/home ];
-            home-manager.users.alin.imports = [
-              ./home/alin.nix
-              "${inputs.private}/home.nix"
-            ];
-          }
+          (
+            { config, ... }:
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "backup";
+              home-manager.extraSpecialArgs = { inherit inputs pkgs-unstable dotFile; };
+              home-manager.sharedModules = [ ./modules/home ];
+              home-manager.users.${config.yuki.user}.imports = [
+                ./home
+                "${inputs.private}/home.nix"
+              ];
+            }
+          )
         ];
       };
     };

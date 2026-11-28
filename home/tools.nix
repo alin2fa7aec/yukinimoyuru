@@ -5,13 +5,6 @@
   liveDot,
   ...
 }:
-let
-  # Identity shared by git and jj. The address is GitHub's noreply one, so it is safe to publish
-  user = {
-    name = "alin";
-    email = "72394482+alin2fa7aec@users.noreply.github.com";
-  };
-in
 {
   home.packages =
     (with pkgs; [
@@ -59,8 +52,8 @@ in
 
   programs.git = {
     enable = true;
+    # user.name and user.email are set by the private input
     settings = {
-      inherit user;
       init.defaultBranch = "main";
       core.editor = "vim";
       core.pager = "delta";
@@ -71,7 +64,6 @@ in
   programs.jujutsu = {
     enable = true;
     settings = {
-      inherit user;
       ui.default-command = "log";
       ui.editor = "vim";
     };

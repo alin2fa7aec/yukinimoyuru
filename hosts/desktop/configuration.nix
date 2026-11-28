@@ -8,27 +8,9 @@
   ...
 }:
 {
-  imports = [ ./hardware-configuration.nix ];
+  # The hardware (disks, boot loader, GPU, clock) is described by the private input, along with its hardware-configuration.nix
 
-  # boot
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10;
-  boot.loader.efi.canTouchEfiVariables = false;
   boot.kernelPackages = pkgs.linuxPackages;
-
-  # file system
-  fileSystems."/".options = [
-    "compress=zstd"
-    "noatime"
-  ];
-  fileSystems."/home".options = [
-    "compress=zstd"
-    "noatime"
-  ];
-  fileSystems."/nix".options = [
-    "compress=zstd"
-    "noatime"
-  ];
   zramSwap.enable = true;
 
   # network/time/locale
@@ -124,19 +106,8 @@
     pulse.enable = true;
   };
 
-  # GPU
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true; # For 32-bit games on games/Wine
-  };
-  services.xserver.videoDrivers = [ "gpu" ];
-  hardware.gpu = {
-    open = true; # Must be set explicitly
-    modesetting.enable = true;
-    powerManagement.enable = true; # Avoids display corruption after resuming from sleep
-    gpuSettings = true;
-    package = config.boot.kernelPackages.gpuPackages.stable;
-  };
+  # GPU (the driver is chosen by the private input)
+  hardware.graphics.enable = true;
 
   # Bluetooth
   hardware.bluetooth = {
@@ -144,14 +115,11 @@
     powerOnBoot = true; # Power on the adapter at boot
   };
 
-  # Game
-  programs.games.enable = true;
-  programs.gamemode.enable = true;
-
   # kanata
   # kanata-linux.kbd contains defcfg, so pass it via configFile instead of config.
   # When a rebuild restarts systemd-udevd, kanata can fail to find the keyboard and exit with "No keyboard devices were found".
-  # sudo systemctl restart kanata-main.service brings it back
+  # sudo systemctl restart kanata-main.service brings it back.
+  # Keyboards that kanata misses when they connect are listed in yuki.kanata.reconnectDevices (modules/nixos/kanata.nix)
   services.kanata = {
     enable = true;
     keyboards.main = {
@@ -159,19 +127,13 @@
       configFile = dotFile "kanata/kanata-linux.kbd";
     };
   };
-  # kanata sometimes misses the Bluetooth keyboard because it cannot grab it yet when rescanning right after it connects.
-  # Restart kanata when it connects so it rescans for devices.
-  # Matching devices that create several event nodes would restart it repeatedly and hit StartLimitBurst, so narrow it to one by name.
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_KEYBOARD}=="1", ATTRS{name}=="keyboard", RUN+="${pkgs.systemd}/bin/systemctl --no-block try-restart kanata-main.service"
-  '';
 
   # Claude Code managed settings (apply to all users and take precedence over user settings).
-  # Values in env are paths, and a leading ~/ in them is expanded to alin's home directory here
+  # Values in env are paths, and a leading ~/ in them is expanded to the desktop user's home directory here
   environment.etc."claude-code/managed-settings.json".text =
     let
       settings = lib.importJSON (dotFile "claude/managed-settings.json");
-      home = config.users.users.alin.home;
+      home = config.users.users.${config.yuki.user}.home;
       expandHome = v: if lib.hasPrefix "~/" v then "${home}/${lib.removePrefix "~/" v}" else v;
     in
     builtins.toJSON (settings // { env = lib.mapAttrs (_: expandHome) (settings.env or { }); });
@@ -184,7 +146,7 @@
   programs.firefox.enable = true;
 
   # user
-  users.users.alin = {
+  users.users.${config.yuki.user} = {
     isNormalUser = true;
     extraGroups = [
       "wheel"

@@ -1,5 +1,6 @@
 # The niri session: its programs, the config files they read, the user services that run them, and the input method
 {
+  config,
   lib,
   pkgs,
   inputs,
@@ -31,6 +32,16 @@ let
       };
       Install.WantedBy = [ "niri.service" ];
     };
+  inherit (config.yuki.desktop) outputs;
+  wallpaper = output: "%h/.local/share/wallpaper/${output.name}";
+  niriOutput =
+    o:
+    lib.concatStrings [
+      "output \"${o.name}\" {\n"
+      (lib.optionalString (o.scale != null) "    scale ${toString o.scale}\n")
+      "    position x=${toString o.x} y=0\n"
+      "}\n"
+    ];
 in
 {
   home.packages =
@@ -56,8 +67,6 @@ in
       imv
       # Cropping and annotating images (satty --filename <image>)
       satty
-      # emulator
-      emulator
     ])
     ++ [
       # Power menu (niri's Ctrl+Alt+Delete and the power box in waybar)
@@ -99,7 +108,25 @@ in
   xdg.configFile."swaync/config.json".source = liveDot "swaync/config.json";
   xdg.configFile."swaync/style.css".source = liveDot "swaync/style.css";
   xdg.configFile."swaync/nordfox.css".source = liveDot "theme/nordfox.css";
-  xdg.configFile."swaylock/config".source = liveDot "swaylock/config";
+
+  # ---- monitors ----
+  # The dotfiles refer to the left and right monitors without naming them; these files give the names (modules/home/desktop-outputs.nix).
+  # niri/config.kdl includes outputs.kdl
+  xdg.configFile."niri/outputs.kdl".text = lib.concatMapStrings niriOutput [
+    outputs.left
+    outputs.right
+  ];
+  # Each bar in waybar/config.jsonc includes the file for its monitor, which sets "output"
+  xdg.configFile."waybar/output-left.jsonc".text = builtins.toJSON { output = outputs.left.name; };
+  xdg.configFile."waybar/output-right.jsonc".text = builtins.toJSON { output = outputs.right.name; };
+  # swaylock has no include, so append each monitor's wallpaper to its config. The config is copied from the pinned dotfiles,
+  # so edits to it need a home-manager switch
+  xdg.configFile."swaylock/config".text =
+    builtins.readFile (dotFile "swaylock/config")
+    + lib.concatMapStrings (o: "image=${o.name}:~/.local/share/wallpaper/${o.name}\n") [
+      outputs.left
+      outputs.right
+    ];
 
   # Long-running desktop programs are user services bound to niri.service (see niriService) rather than
   # niri's spawn-at-startup. waybar started that way sometimes crashed right after login and never came back
@@ -115,7 +142,7 @@ in
       description = "wall clock with an audio spectrum ring";
       exec = lib.concatStringsSep " " [
         "${pkgs.callPackage ../pkgs/clock-ring { }}/bin/clock-ring"
-        "--output DP-1 --margin-right 52"
+        "--output ${outputs.left.name} --margin-right 52"
         "--theme ${dotFile "theme/nordfox.css"}"
         "--wires ${dotFile "waybar/circuit/wires.json"}"
       ];
@@ -185,11 +212,13 @@ in
     # then apply with systemctl --user restart swaybg
     swaybg = niriService {
       description = "swaybg wallpaper for niri";
-      exec = lib.concatStringsSep " " [
-        "${pkgs.swaybg}/bin/swaybg"
-        "-o DP-1 -i %h/.local/share/wallpaper/DP-1 -m fill"
-        "-o DP-2 -i %h/.local/share/wallpaper/DP-2 -m fill"
-      ];
+      exec = lib.concatStringsSep " " (
+        [ "${pkgs.swaybg}/bin/swaybg" ]
+        ++ map (o: "-o ${o.name} -i ${wallpaper o} -m fill") [
+          outputs.left
+          outputs.right
+        ]
+      );
     };
   };
   # niri.service also pulls in xdg-desktop-autostart.target, which starts the applets' own autostart entries.

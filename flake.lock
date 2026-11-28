@@ -3,11 +3,11 @@
     "dotfiles": {
       "flake": false,
       "locked": {
-        "lastModified": 1795846489,
-        "narHash": "sha256-deDkTKJwCDseVsYCTeEht1Hm/7k8yQlCVj7SVfZJPes=",
+        "lastModified": 1795852657,
+        "narHash": "sha256-A/8drvUamkrJE+Y3nx/PwPHHdGsb7lMyO4FQ6/nY1uM=",
         "owner": "alin2fa7aec",
         "repo": "dotfiles",
-        "rev": "8937efd31289712417729fb115b0c3feaa7c5f48",
+        "rev": "80fb7ad5889b742dce70483ba06b24fbbde3904c",
         "type": "github"
       },
       "original": {
@@ -109,16 +109,16 @@
     "private": {
       "flake": false,
       "locked": {
-        "lastModified": 1795846450,
-        "narHash": "sha256-y+sTxXrRfglSP13Bc9fyKpO53k6ah8xGtk9TjOXGQwg=",
-        "rev": "e3801e146484266363c094167ca62137061d7d07",
-        "revCount": 1,
+        "lastModified": 1795851428,
+        "narHash": "sha256-I4QQFpBDMf3+huIENbwoqEht1kUgroeEHXjiW0+zRnA=",
+        "rev": "bb51f1e0a6396b0f538149bfc6c4bff511a480aa",
+        "revCount": 2,
         "type": "git",
-        "url": "file:///home/alin/src/yukinihimuru"
+        "url": "file:///etc/nixos"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/alin/src/yukinihimuru"
+        "url": "file:///etc/nixos"
       }
     },
     "root": {
